@@ -1,0 +1,7 @@
+
+# 语料衍生文本，不可再分发（W&I 授权第 6 条）
+results/*.csv
+results/errant/*.txt
+results/errant/*.m2
+.venv-errant/
+src/*.bak

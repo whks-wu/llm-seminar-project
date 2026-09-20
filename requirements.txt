@@ -1,0 +1,11 @@
+torch
+transformers==4.46.3
+datasets
+accelerate
+errant
+spacy==3.7.5
+python-Levenshtein
+pandas
+scipy
+matplotlib
+pathlib

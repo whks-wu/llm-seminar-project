@@ -1,0 +1,31 @@
+.venv/
+__pycache__/
+*.pyc
+data/raw/
+.DS_Store
+
+.DS_Store
+~$*
+.venv/
+.Rhistory
+
+# Corpus text is licensed: not redistributable (W&I licence clause 6).
+# The manifest (ids + seed + checksum) is committed instead.
+data/processed/sample.jsonl
+wi+locness_v2.1.bea19.tar.gz
+*.tar.gz
+notes/.Rhistory
+
+# 语料衍生文本，不可再分发（W&I 授权第 6 条）
+results/*.csv
+results/errant/*.txt
+results/errant/*.m2
+.venv-errant/
+src/*.bak
+
+# 语料文本（W&I 授权第 6 条）——用 select_fewshot.py + seed 42 重现
+notes/fewshot_examples.json
+
+# 他人享有著作权的论文，不转载
+reference/
+finalprojects.pdf

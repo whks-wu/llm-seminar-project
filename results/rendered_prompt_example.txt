@@ -1,0 +1,7 @@
+======================================================================
+VARIANT: zero-shot   (item A.dev.0000, stop=None)
+======================================================================
+Correct only grammatical errors in this sentence and then only output the corrected sentence.
+
+It 's difficult answer at the question " what are you going to do in the future ? " if the only one who has to know it is in two minds .
+
