@@ -103,6 +103,11 @@ Items made worse: 65.0% · 56.5% · **40.0%**.
 
 ### S6. Prior conditions could not do the task (pilot, n=20)
 
+Smoke test (1 sentence, no instruction): both base LMs fell into greedy repetition loops
+("The answer is that the answer is that ..."; "I think it's a very important question. I
+think it's ..."). Citable explanation of this behaviour under greedy decoding:
+Holtzman, Buys, Du, Forbes & Choi (2020), *The Curious Case of Neural Text Degeneration*, ICLR.
+
 GPT-2 few-shot reproduced the input verbatim on **18/20** items; GPT-BERT continued into
 invented example blocks on 19/20. GPT-BERT has no eos token (GPT-2 has one but did not emit it).
 Use this to motivate why the conditions changed — and as the concrete illustration of why
