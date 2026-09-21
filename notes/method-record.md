@@ -56,11 +56,44 @@ differences count as edits. Steps: unify quote characters; remove space before p
 split clitics (`'s`, `n't`, `'re`, ...) into separate tokens; separate punctuation;
 lowercase. Applied to source, gold and model output alike.
 
-**Effect: median edit magnitude fell from 0.36-0.49 to 0.167-0.250.**
-More than half of the raw difference was tokenisation artefact, not model behaviour.
+**Effect (same 200 items): median edit magnitude fell from 0.375-0.438 to 0.167-0.250.**
+43-56% of the raw distance was tokenisation artefact, not model behaviour.
 
 **Caveat to state:** (a) and (b) are hand-written heuristics, not ERRANT/spaCy. Results
 are sensitive to them. ERRANT tokenises both sides with spaCy and is the proper tool.
+
+### Why the shipped gold M2 was NOT used as the ERRANT reference
+
+The corpus readme states the M2 files were generated with **spaCy v1.9.0** and
+`en_core_web_sm-1.2.0`. Scoring them against edits extracted by a modern ERRANT (spaCy 3.x)
+mixes two tokenisers and produces spurious mismatches.
+
+Instead, the reference M2 was regenerated from (source, gold) plain text with the *same*
+ERRANT installation that processes the model output:
+
+    errant_parallel -orig source.txt -cor gold.txt -out ref.m2
+
+Both sides therefore pass through identical tokenisation and edit extraction. This also
+removes the need for the hand-written normalisation in (b) for the ERRANT-based metrics —
+spaCy tokenises `It 's` and `It's` to the same two tokens. See `src/export_for_errant.py`.
+
+### Corpus facts verified from primary sources (not inferred)
+
+- **No annotation guidelines are published.** Checked: the BEA-2019 shared-task page,
+  Yannakoudakis et al. (2018), the CLC annotation paper (Nicholls, English Profile Journal
+  2011), and the corpus readme shipped with the data. None documents a minimal-edit policy.
+  W&I+LOCNESS is *conventionally* treated as a minimal-edit corpus in the GEC literature,
+  but that convention is not backed by a published annotation standard.
+- **Gold M2 edit spans are ERRANT-derived, not human-authored.** The readme states the M2
+  files were produced from character-level edits via `json_to_m2.py`. Annotators produced
+  corrected *text*; the edit *spans* are algorithmic. Gold edit size is therefore not
+  evidence that annotators chose to edit minimally.
+- **Single annotator per text — verified empirically.** The JSON format supports multiple
+  annotators and v2.1 updated the converter to handle them, so this was checked directly:
+  A.dev 130/130 texts and A.train 1300/1300 texts have exactly one annotator.
+- Fine-grained CEFR exists in the JSON but is dropped in the M2 files. A.dev splits as
+  A1.i 22 · A1.ii 32 · A2.i 24 · A2.ii 52 texts. CEFR A is A1+A2, so the A-level M2 file
+  already matches the research question; no action was needed.
 
 ## 5. Measure
 

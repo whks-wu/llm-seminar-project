@@ -1,118 +1,128 @@
-# Design decisions (my own — record reasoning, not just the choice)
+# How the project changed: from BabyLM to small locally deployable models
 
-## D1. Size-matched control condition?
-Decision: BabyLM vs GPT-2-small; GPT-2-small vs Qwen; BabyLM vs Qwen
-Reasoning: 
+*This note explains why I shifted the focus of my project from BabyLM to small-parameter
+models that can be deployed locally.*
 
-## D3. BabyLM checkpoint chosen, and why
-BabyLM is called BabyLM not only because it was trained on a relatively small dataset, but also because the content of that dataset is child-directed.
-So I should in fact choose a LM with small training datasize. BabyLM is a LM with lower cognitive complexity. If I still want to compare it with LLM the
-research question is changed or should be cover bigger, it should be like "a LM with lower cognitive complexity or a LM trained on small dataset versus LLM which one shows lower trend on 
-grammar overcorrection "
-Decision: BabyLM vs GPT-2-small; GPT-2-small vs Qwen; BabyLM vs Qwen
-"You already have human behavioural data and may not have noticed: the gold edits in A.dev.gold.bea19.m2 are corrections produced by human annotators, with an explicit minimal-edit annotation policy. What does having a human baseline let you ask that "which model scores better" doesn't?" 
-I can treat the corrections produced by human annotators as human baseline and it will be used to compare with the corrections by models. 
-Reasoning: Only in this way I then match the topic which is discussed in this semeniar. 
+## Starting point
 
-## D4. LLM control chosen, and why
-Decision:
-Reasoning:
+My project proposal originally planned to investigate whether **models trained on small
+datasets exhibit less overcorrection**.
 
-## D5. Sample: which CEFR level, how many sentences, filtering rules
-Decision (as implemented in `src/prepare_data.py`, settled 11.09):
-- CEFR level A (= A1 + A2) dev split, `A.dev.gold.bea19.m2`
-- 200 sentences, `RANDOM_SEED = 42`, frozen and reproducible via `sample_manifest.json`
-- Length band 5-40 tokens
-- Punctuation/orthography-only sentences dropped
-- Spelling and orthography edits KEPT everywhere (in gold and in metrics), per BEA-2019
-  convention; removing them from gold would bias results toward the hypothesis
-- UNK edits kept; 14 degenerate items where the recorded correction equals the source dropped
-- Result: 1037 -> 705 eligible -> 200 sampled
+My motivation stems from the fact that BabyLM models are low-cost for both individuals and
+institutions: they can be deployed locally and do not require renting supercomputers or
+buying access to large models or APIs from major AI companies. This makes them more
+conducive to educational equity — any individual or institution with a personal computer
+and internet access could use language models to support language education.
 
-Reasoning: (write this yourself — the decisions above are recorded, the justification is
-what the report needs and what the grading criteria assess)
-
-## D6. Prompting strategy (settled 15.09)
-Decision:
-- Few-shot only for the 200-sentence main run; one zero-shot variant in the 20-sentence
-  pilot as documented evidence that base LMs do not follow instructions
-- All three models receive the identical prompt
-- 8 demonstration examples, sampled from the TRAINING split with seed 42, stratified to
-  approximate the corpus edit-count distribution
-- No explicit "minimal edit" instruction in any prompt
-
-Reasoning: 
-
-
+During the experiment, I realised I could also investigate whether **the number of
+parameters** affects overcorrection when models correct grammatical errors.
 
 ---
 
-# REVISION 16.09 — conditions changed after the pilot
+## 1st adjustment: there are two dimensions to BabyLM's "small"
 
-## D7. Why the BabyLM / GPT-2 conditions were dropped
+After rereading the BabyLM Challenge materials, I realised that BabyLM models do not only
+have a smaller training dataset. Of the training corpus:
 
-Evidence: `results/pilot_outputs.csv`, 20 sentences x 3 models x 2 prompt variants.
+- about **5%** is CHILDES child-directed speech,
+- **31%** is movie subtitles,
+- **15%** is Simple Wikipedia,
 
-- GPT-2, few-shot: 18/20 outputs identical to the input. It learned the output *format*
-  from the demonstrations but not the correction task.
-- GPT-BERT, few-shot: 19/20 continued into newly invented example blocks; outputs are
-  fragments (median length 0.66x the source).
-- Both, zero-shot: open-ended continuation, 1.65-1.80x source length.
-- Neither has an eos token, so neither can stop on its own.
+so the cognitive difficulty of the corpus is relatively low. In addition to having a far
+smaller training dataset than large language models, BabyLM's training data is also
+cognitively simpler.
 
-Two of three conditions therefore never produce a correction. An overcorrection comparison
-is impossible when two arms do not correct at all.
+In other words, BabyLM and Qwen differ in **all** dimensions (data volume, number of
+parameters, instruction tuning, architecture), so any differences in the results could not
+be attributed to any single one of these factors.
 
-**Methodological point worth keeping:** verbatim copying scores zero edit distance, i.e.
-*perfect* minimal editing on a naive Levenshtein metric, while fixing nothing. The ERRANT
-recall gate is what separates restraint from incapacity — this pilot is the empirical
-justification for it.
+**Decision:** I introduced GPT-2 as a transitional condition and set up three pairwise
+comparisons:
 
-## D8. Replacement conditions: Qwen2.5 size ladder
+| Comparison |
+|---|
+| GPT-BERT vs. Qwen2.5-3B |
+| GPT-2 vs. GPT-BERT |
+| GPT-2 vs. Qwen2.5-3B |
 
-0.5B / 1.5B / 3B-Instruct. Same family: pretraining corpus, instruction tuning,
-architecture and tokenizer all constant; only parameter count varies.
+---
 
-Chosen over a mixed-family set (SmolLM2 / Llama-3.2 / Qwen) because a mixed set confounds
-family with size. Generalisation across families belongs in the discussion, not in the design.
+## 2nd adjustment: the two base LMs cannot handle this task
 
-Reasoning: (write this yourself)
+After coding the experimental pipeline, I tested zero-shot and few-shot prompting on a
+small sample of 20 sentences:
 
-## D9. THE RESEARCH QUESTION HAS CHANGED — rewrite it
+- **GPT-2** directly copied the input in **18 of 20** cases.
+- **GPT-BERT** continued the text in **19 of 20** cases, and its output was only
+  **0.66×** the length of the original sentence.
+- GPT-BERT has **no EOS token** (its `eos_token_id` is `None`), and neither model stopped
+  on its own.
 
-All three replacement models are pretrained on ~18T tokens. **The independent variable is
-now parameter count, not training-data size.** The original question — whether models
-trained on little data overcorrect less — cannot be answered with these conditions.
+This indicates that the non-instruction-tuned models tested here — base LMs — are unable to
+perform this grammatical error correction task.
 
-The new question has to be about model *size* among locally deployable free models, which
-is the practical motivation stated in the original project draft ("faster response and
-lower computational costs, or even no cost at all").
+**Decision:** I abandoned BabyLM and GPT-2 and switched to **Qwen2.5 0.5B, 1.5B and 3B**.
+I chose models from the same family, because mixing families would conflate *family* with
+*scale*.
 
-New research question (Among models that learners can deploy locally for free, does model size affect the tendency toward overcorrection? — this is the one thing that must be entirely your own,
-and it is what the "is the research question well-motivated / appropriately specific"
-criterion assesses):
+**Critical consequence:** all three new models were trained on ~18T tokens, so **the
+independent variable shifted from the amount of training data to the number of
+parameters**. The research question had to be rewritten.
 
-Reasoning:
+---
 
-## D10. Narrative for the report
+## 3rd adjustment: few-shot prompting fails for instruction-tuned models
 
-The BabyLM reading is not wasted — it becomes the motivation *and* the first result:
+After switching models, I ran a second 20-sentence test, again with zero-shot and few-shot
+prompts. Under **few-shot**:
 
-1. Motivation: BabyLM literature, minimal-edit pedagogy, low-cost educational AI.
-2. Result 1: models at developmentally plausible pretraining scale cannot do generative
-   error correction at all (pilot table).
-3. Therefore: turn to the class of models a learner could actually deploy for free.
-4. Result 2: the size comparison.
+| Model | Outputs with a preamble | Median edit distance (raw, 20-item pilot) |
+|---|---|---|
+| Qwen2.5-0.5B | 7 / 20 | 0.858 — highest of the six conditions |
+| Qwen2.5-1.5B | 0 / 20 | 0.393 — lowest of the six conditions |
 
-This makes the model swap a data-driven design decision rather than a change of topic.
+Qwen2.5-0.5B also sometimes interpreted the eight few-shot examples as a dialogue
+transcript and replied with an apology.
 
-## D11. Disable few-shot
+**Decision:** use only zero-shot prompts for the instruction-tuned models — although
+zero-shot outputs were contaminated by preambles such as *"The corrected sentence is:"*.
 
-Reasoning: Because when using few-shot prompt techniques with command-based models, the model may respond based on its understanding of these examples—it may output the corrected sentence directly, or it may provide an explanatory statement followed by the corrected sentence.
-And hallucinations may also occur. (Qwen2.5-0.5B and Qwen2.5-3B)
+---
 
-Surprisingly, the sentences generated by Qwen2.5-1.5B are very straightforward and follow the prompt exactly.
+## 4th adjustment: prompt iteration
 
-But there is a output under zero-shot "The corrected sentence is:
+I modified the prompt to explicitly require *output only the corrected sentence*.
 
-"I think that the public transport will always be in the future."" which has a preface.
+| | Responses with a preamble |
+|---|---|
+| Before the change | ~23 / 60 |
+| After the change | 1 / 60 |
+
+---
+
+## Why the metrics became more complex step by step
+
+1. **Starting assumption.** I first thought that with Levenshtein edit distance, fewer
+   changes meant less overcorrection.
+
+2. **Spelling edits are kept.** If spelling edits were excluded from the gold data, Qwen's
+   correct spelling corrections would be counted as overcorrections, systematically biasing
+   the result toward the hypothesis. Therefore all spelling edits were retained.
+
+3. **Fewer changes ≠ restraint.** GPT-2 copied the input in 18 of 20 cases, giving an edit
+   distance of 0. On a naive metric this looks like a *perfect minimal modification*, but it
+   did not correct a single error. **"Fewer changes" cannot distinguish restraint from
+   incompetence.**
+
+4. **ERRANT recall as a gate.** To determine whether a model actually made the right
+   corrections, I used ERRANT and computed recall from its output.
+
+5. **Tokenisation.** The corpus is pre-tokenised (`It 's`), while model output is natural
+   text (`It's`). On the same 200 sentences, the median edit distance was **0.375–0.438
+   before normalisation and 0.167–0.250 after** — i.e. **43–56%** of the raw distance was
+   tokenisation noise.
+
+6. **Regenerated reference.** The M2 file shipped with the corpus was generated with
+   spaCy 1.9 and should not serve as the reference for a modern ERRANT (spaCy 3.x).
+   I therefore regenerated `ref.m2` from the (source, gold) pairs using the same ERRANT
+   installation as for the model outputs.

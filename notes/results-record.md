@@ -104,29 +104,109 @@ Items made worse: 65.0% · 56.5% · **40.0%**.
 ### S6. Prior conditions could not do the task (pilot, n=20)
 
 GPT-2 few-shot reproduced the input verbatim on **18/20** items; GPT-BERT continued into
-invented example blocks on 19/20. Neither has an eos token.
+invented example blocks on 19/20. GPT-BERT has no eos token (GPT-2 has one but did not emit it).
 Use this to motivate why the conditions changed — and as the concrete illustration of why
 edit distance alone is insufficient (verbatim copying = zero edits = apparently perfect
 minimal editing, while fixing nothing).
 
 ---
 
-## Tier 3 — limitations that must appear
+## Tier 3 — limitations, ordered by how much they threaten the conclusion
 
-1. **Absolute performance is poor.** FP outnumbers TP 4-7x. BEA-2019 winning systems reach
-   F0.5 ~0.70; these reach 0.13-0.29. The claim is about relative differences between
-   conditions, not about usable correction quality.
-2. **Punctuation is a blind spot for all three.** PUNCT recall .014 / .043 / .057 against
-   70 gold punctuation edits, while introducing 35-47 unnecessary ones. Does not improve
-   with size.
-3. Post-processing (preamble removal, tokenisation) is hand-written; 1.5B most affected
-   (14/200 preambles vs 3 and 1).
-4. Single annotator per text; some FP may be valid alternative corrections.
-5. No minimality criterion given to the models (deliberate, D6).
-6. One model family, one prompt, one decoding strategy, English only, CEFR level A only.
-7. Gold M2 edits are ERRANT-derived; no W&I annotation guidelines are published.
+### A. Directly limit what can be concluded — write these prominently
+
+**A1. Absolute performance is poor; the claim is only about relative differences.**
+FP outnumbers TP by 4.0-7.6x. Precision 0.12-0.28. F0.5 0.13-0.29, against ~0.70 for
+BEA-2019 winning systems. The single most honest sentence available:
+**no condition improves more items than it harms** (improved 18.5% / 25.0% / 37.5%;
+made worse 65.0% / 56.5% / 40.0%).
+Without this, readers will take the result to mean 3B is usable for correction. It is not.
+
+**A2. The 3B-vs-human comparison is not significant.**
+Uncorrected p = .028; **Holm-corrected p = .056**. The medians coincide (0.167 vs 0.167),
+which invites the phrase "matches the human annotator" — the statistics do not support it,
+and 3B's precision is only 0.199. **Equal edit magnitude is not equal edit behaviour.**
+
+**A3. Post-processing is hand-written, and its effect is asymmetric across conditions.**
+Preamble removal and tokenisation normalisation are heuristics, not standard tools. Crucially
+the preamble rate differs by condition: **1.5B 14/200, 0.5B 3/200, 3B 1/200.** How cleanly
+the rule strips affects 1.5B far more than the others — a potential systematic bias that
+must be declared rather than discovered by a reader.
+
+**A4. The pilot evidence is n = 20.**
+The claim that developmentally-plausible-scale models cannot perform generative correction
+rests on 20 sentences. 18/20 verbatim copying is a strong signal, but it is still n = 20.
+
+### B. Properties of the data — short but required
+
+**B1. Single annotator per text.** Verified directly: A.dev 130/130 and A.train 1300/1300
+texts have exactly one annotator. Some false positives may be valid alternative corrections
+rather than overcorrection, and there is no second annotation to tell them apart.
+
+**B2. No published annotation guidelines.** Checked the shared-task page, Yannakoudakis
+et al. (2018), the CLC annotation paper, and the corpus readme. W&I+LOCNESS is
+*conventionally* treated as a minimal-edit corpus, but no annotation standard backs that,
+and the data contains counter-examples (one `R:WO` edit reorders seven tokens at once).
+
+**B3. Gold edit spans are ERRANT-derived, not human-authored.** Annotators produced
+corrected *text*; the spans were extracted algorithmically. Gold edit magnitude therefore
+cannot be used as evidence that annotators chose to edit minimally.
+
+**B4. Excluding R:ORTH is a judgement call.** Both sets of numbers are reported, but the
+decision that orthographic normalisation "is not correction behaviour" can be contested.
+
+### C. Costs of deliberate design choices
+
+**C1. No minimality criterion was given to the models** (D6). Instructing minimal editing
+would have measured instruction-following rather than intrinsic tendency, but the cost is
+that some observed variation may reflect differing default interpretations of how much to
+change, not differing restraint.
+
+**C2. One prompt, one decoding strategy.** Greedy decoding only; prompt sensitivity untested.
+A single prompt formulation was used for the 200-item run.
+
+### D. Generalisation
+
+**D1.** One model family (Qwen2.5), English only, CEFR level A only, n = 200, single
+proficiency level. Nothing here establishes that the pattern holds across families — the
+same-family design was chosen precisely to avoid confounding family with size, which means
+cross-family generalisation is explicitly out of scope.
+
+### E. Both a finding and a limitation
+
+**E1. Punctuation is a blind spot for all three models and does not improve with size.**
+Recall .014 / .043 / .057 against 70 gold punctuation edits, while introducing 35-47
+unnecessary ones. This shows the size effect is **not uniform across error types** — which
+qualifies any general claim that larger models correct better.
 
 ---
+
+## Which figures and tables must be described
+
+Two pages will not hold everything. Three items are non-negotiable; each needs at least one
+sentence in the running text saying what it shows and why it matters — a figure left to
+speak for itself does not satisfy "are the results presented clearly".
+
+**Table 1 (essential): ERRANT TP / FP / R / P / F0.5, with and without R:ORTH.**
+The core evidence. It is the only element that reports *both* how much was fixed and how
+much was needlessly changed, and therefore the only thing that rules out "editing less is
+just doing less".
+
+**Figure 1 (essential): edit magnitude per condition with the human reference.**
+Medians with bootstrap CIs, plus Friedman chi2(2) = 17.28, p = .00018 and the post-hoc
+outcome. Mark the 3B-vs-human comparison as n.s.
+
+**Example A.dev.0000 (essential).** Not a figure, but more effective than one. Human makes
+two minimal edits; 3B makes exactly the same two; 1.5B rewrites the subordinate clause;
+0.5B additionally replaces `difficult`, `if` and `in two minds`, none of which contained a
+grammatical error.
+
+**Figure 2 (if space allows): OTHER false positives falling (249 -> 247 -> 163) against
+VERB:TENSE precision rising (.44 -> .45 -> .69).** Shows *where* scale helps — fewer
+free-form rewrites, better canonical grammar — which is a level deeper than "smaller edits".
+
+**Pilot failure: two sentences of text, no table needed.** GPT-2 reproduced the input on
+18/20 items; GPT-BERT continued into invented example blocks on 19/20.
 
 ## Claims the data does NOT support — do not write these
 
