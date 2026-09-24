@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Overcorrection Poster</title>
+<style>
+  @page { size: A0 portrait; margin: 0; }
+  :root{
+    --surface:#ffffff; --plane:#f9f9f7;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --rule:rgba(11,11,11,.10);
+    --model:#2a78d6; --human:#eb6834;
+    --todo-bg:#eef4fd; --todo-br:#9ec5f4; --todo-ink:#184f95;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{background:var(--surface)}
+  body{
+    width:841mm; height:1189mm;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    color:var(--ink); padding:26mm 30mm 20mm;
+    display:flex; flex-direction:column;
+  }
+  header{border-bottom:1.2mm solid var(--ink); padding-bottom:9mm}
+  h1{font-size:33mm; line-height:1.04; font-weight:700; letter-spacing:-.4mm}
+  .byline{margin-top:7mm; display:flex; justify-content:space-between; align-items:flex-end; gap:20mm}
+  .byline .who{font-size:11mm; font-weight:600}
+  .byline .where{font-size:8mm; color:var(--ink-2); line-height:1.35; text-align:right}
+
+  .cols{flex:1 1 auto; display:grid; grid-template-columns:1fr 1fr 1fr; gap:20mm; padding:12mm 0}
+  .col{display:flex; flex-direction:column; justify-content:space-between; gap:10mm}
+  section{break-inside:avoid}
+  h2{font-size:15mm; font-weight:700; letter-spacing:-.15mm;
+     padding-bottom:2.4mm; margin-bottom:5mm; border-bottom:.7mm solid var(--ink)}
+  p{font-size:10.5mm; line-height:1.45}
+  .small{font-size:9.2mm; line-height:1.42; color:var(--ink-2)}
+  .tiny{font-size:6.6mm; line-height:1.38; color:var(--ink-2)}
+  b{font-weight:700}
+
+  .todo{background:var(--todo-bg); border:.5mm dashed var(--todo-br); border-radius:2mm;
+        padding:7mm; font-size:9.5mm; line-height:1.42; color:var(--todo-ink)}
+  .todo .hint{display:block; margin-top:3.5mm; font-size:7.8mm; color:#256abf}
+
+  dl.spec{font-size:9.5mm; line-height:1.4}
+  dl.spec div{display:grid; grid-template-columns:58mm 1fr; gap:5mm;
+              padding:3.6mm 0; border-top:.3mm solid var(--rule)}
+  dl.spec div:first-child{border-top:0}
+  dl.spec dt{color:var(--muted); font-weight:600; padding-right:2mm; hyphens:auto}
+  code{font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:.9em}
+
+  table{width:100%; border-collapse:collapse; font-size:9.4mm; font-variant-numeric:tabular-nums}
+  caption{text-align:left; font-size:8.4mm; color:var(--ink-2); padding-bottom:3mm; line-height:1.35}
+  th,td{padding:3.4mm 1.5mm; text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  thead th{border-bottom:.6mm solid var(--ink); font-weight:650; font-size:8.2mm; color:var(--ink-2)}
+  tbody tr+tr td{border-top:.3mm solid var(--rule)}
+  tbody tr.hi td{font-weight:700}
+
+
+  table.ex{font-size:7mm; line-height:1.34; font-variant-numeric:normal}
+  table.ex td{padding:2.8mm 0; text-align:left; vertical-align:top}
+  table.ex td.who{width:30mm; padding-right:5mm; color:var(--muted); font-weight:650; white-space:nowrap}
+  table.ex td.mag{width:22mm; padding-left:4mm; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2); white-space:nowrap}
+  table.ex td.sent{font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:6.6mm; line-height:1.38}
+  table.ex tr.src td{border-bottom:.5mm solid var(--rule)}
+  table.ex tr+tr td{border-top:.3mm solid var(--rule)}
+  figure{margin:0}
+  figcaption{font-size:8.6mm; line-height:1.4; color:var(--ink-2); margin-top:3.5mm}
+  figcaption b{color:var(--ink); font-weight:650}
+  svg{width:100%; height:auto; display:block}
+  .legend{display:flex; gap:11mm; align-items:center; font-size:8.6mm; color:var(--ink-2); margin-bottom:3.5mm}
+  .legend span{display:inline-flex; align-items:center; gap:2.8mm}
+  .legend i{width:5.5mm; height:5.5mm; border-radius:50%; display:inline-block}
+
+  .keys{display:grid; grid-template-columns:1fr 1fr; gap:6mm; margin-top:6mm}
+  .key{background:var(--plane); border-radius:2.5mm; padding:6mm}
+  .key .v{font-size:14mm; font-weight:700; line-height:1}
+  .key .l{font-size:8mm; color:var(--ink-2); margin-top:2.5mm; line-height:1.32}
+
+  footer{padding-top:7mm; border-top:.7mm solid var(--ink);
+         display:grid; grid-template-columns:2fr 1fr; gap:16mm}
+  footer h3{font-size:9mm; font-weight:700; margin-bottom:3.5mm}
+  .refs p{font-size:6.6mm; line-height:1.36; color:var(--ink-2); padding-left:5mm; text-indent:-5mm}
+  .refs p+p{margin-top:1.8mm}
+  .repo .url{font-family:ui-monospace,Menlo,monospace; font-size:8.4mm;
+             word-break:break-all; color:#184f95; margin-bottom:3.5mm}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>[TITLE — 你的海报标题，8–14 个词]</h1>
+  <div class="byline">
+    <div class="who">Qiancao Jiang</div>
+    <div class="where">
+      LLMs as models of human sentence processing · SoSe 2026<br>
+      Prof. Vera Demberg · Universität des Saarlandes
+    </div>
+  </div>
+</header>
+
+<div class="cols">
+  <div class="col">
+    <section>
+      <h2>Motivation</h2>
+      <div class="todo" style="min-height:66mm"><b>[你的文字：动机]</b>
+        <span class="hint">约 60–80 词。为什么 overcorrection 值得研究；BabyLM 最初的吸引力；引 Kopylova et al. (2026)。</span></div>
+    </section>
+
+    <section>
+      <h2>Research question</h2>
+      <div class="todo" style="min-height:52mm"><b>[你的文字：研究问题]</b>
+        <span class="hint">一句话，直接从 2-page summary 搬过来。可加一句说明为什么从 BabyLM 转向了同族参数阶梯。</span></div>
+    </section>
+
+    <section>
+      <h2>Hypothesis</h2>
+      <div class="todo" style="min-height:42mm"><b>[你的文字：假设]</b>
+        <span class="hint">约 25 词。假设 + overcorrection 的操作化定义（normalized edit distance + FP 数）。</span></div>
+    </section>
+
+    <section>
+      <h2>Method</h2>
+      <dl class="spec">
+        <div><dt>Corpus</dt><dd>W&amp;I+LOCNESS v2.1 (BEA-2019), CEFR-A dev split</dd></div>
+        <div><dt>Sampling</dt><dd>1,037 → 705 after filtering → <b>200</b> items, seed 42</dd></div>
+        <div><dt>Filters</dt><dd>5–40 tokens; ≥1 non-noop edit; no punctuation- or orthography-only items; 14 degenerate items dropped</dd></div>
+        <div><dt>Conditions</dt><dd>Qwen2.5-0.5B / 1.5B / 3B-Instruct — same family, same tokenizer, <b>only parameter count varies</b>; human annotator as a fourth reference point</dd></div>
+        <div><dt>Prompt</dt><dd>zero-shot: <code>“Correct only grammatical errors in this sentence and then only output the corrected sentence.”</code></dd></div>
+        <div><dt>Decoding</dt><dd>greedy; 200 × 3 = <b>600</b> generations, 0 failures</dd></div>
+        <div><dt>Post-processing</dt><dd>model commentary removed by <b>manual annotation</b> (prefaces 7 / 15 / 0; trailing comments 0 / 2 / 5), archived in the repository</dd></div>
+        <div><dt>Measures</dt><dd>normalized word-level edit magnitude vs the source; ERRANT span-based P / R / F<sub>0.5</sub> vs the gold correction</dd></div>
+        <div><dt>Statistics</dt><dd>Friedman (tie-corrected); post-hoc Wilcoxon signed-rank, Holm-corrected; rank-biserial <i>r</i>; 4,000-resample percentile bootstrap CIs</dd></div>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Why two measures</h2>
+      <p class="small">Edit magnitude asks <b>how much</b> a condition changed the sentence; ERRANT asks <b>whether the changes were the right ones</b>. Magnitude alone cannot separate a model that edits little because it is restrained from one that edits little because it cannot correct — a model that simply copies the input scores a perfect 0.</p>
+    </section>
+  </div>
+
+  <div class="col">
+    <section>
+      <h2>Finding 1 · a step, not a gradient</h2>
+      <div class="todo" style="min-height:42mm"><b>[你的文字：Finding 1 的结论]</b>
+        <span class="hint">约 30–40 词。可直接用 summary 里那句，加上"阈值在 1.5B–3B 之间"。</span></div>
+      <figure style="margin-top:6mm">
+        <div class="legend"><span><i style="background:var(--model)"></i>Model</span><span><i style="background:var(--human)"></i>Human annotator</span></div>
+        <svg viewBox="0 0 600 300" role="img" aria-label="Median normalized edit magnitude with 95% bootstrap confidence intervals">
+          <!-- gridlines -->
+          <g stroke="#e1e0d9" stroke-width="1">
+            <line x1="160" y1="28" x2="160" y2="248"/>
+            <line x1="228.3" y1="28" x2="228.3" y2="248"/>
+            <line x1="296.7" y1="28" x2="296.7" y2="248"/>
+            <line x1="365" y1="28" x2="365" y2="248"/>
+            <line x1="433.3" y1="28" x2="433.3" y2="248"/>
+            <line x1="501.7" y1="28" x2="501.7" y2="248"/>
+            <line x1="570" y1="28" x2="570" y2="248"/>
+          </g>
+          <!-- axis -->
+          <line x1="160" y1="248" x2="570" y2="248" stroke="#c3c2b7" stroke-width="1"/>
+          <g font-size="15" fill="#898781" text-anchor="middle" font-family="system-ui,sans-serif">
+            <text x="160" y="270">0</text><text x="228.3" y="270">.05</text>
+            <text x="296.7" y="270">.10</text><text x="365" y="270">.15</text>
+            <text x="433.3" y="270">.20</text><text x="501.7" y="270">.25</text>
+            <text x="570" y="270">.30</text>
+            <text x="365" y="292" fill="#52514e" font-size="16">normalized edit magnitude (median, 95% CI)</text>
+          </g>
+          <!-- row labels -->
+          <g font-size="17" fill="#0b0b0b" text-anchor="end" font-family="system-ui,sans-serif">
+            <text x="146" y="55">Qwen2.5-0.5B</text>
+            <text x="146" y="100">Qwen2.5-1.5B</text>
+            <text x="146" y="145">Qwen2.5-3B</text>
+            <text x="146" y="205">Human</text>
+          </g>
+          <!-- 0.5B -->
+          <g stroke="#2a78d6" stroke-width="3" stroke-linecap="round">
+            <line x1="445.7" y1="50" x2="501.7" y2="50"/>
+            <line x1="445.7" y1="42" x2="445.7" y2="58"/><line x1="501.7" y1="42" x2="501.7" y2="58"/>
+          </g>
+          <circle cx="493.5" cy="50" r="8" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+          <text x="493.5" y="28" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">0.244</text>
+          <!-- 1.5B -->
+          <g stroke="#2a78d6" stroke-width="3" stroke-linecap="round">
+            <line x1="425.1" y1="95" x2="519.4" y2="95"/>
+            <line x1="425.1" y1="87" x2="425.1" y2="103"/><line x1="519.4" y1="87" x2="519.4" y2="103"/>
+          </g>
+          <circle cx="475.7" cy="95" r="8" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+          <text x="475.7" y="80" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">0.231</text>
+          <!-- 3B -->
+          <g stroke="#2a78d6" stroke-width="3" stroke-linecap="round">
+            <line x1="355.4" y1="140" x2="425.1" y2="140"/>
+            <line x1="355.4" y1="132" x2="355.4" y2="148"/><line x1="425.1" y1="132" x2="425.1" y2="148"/>
+          </g>
+          <circle cx="388.2" cy="140" r="8" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+          <text x="388.2" y="125" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">0.167</text>
+          <!-- human -->
+          <g stroke="#eb6834" stroke-width="3" stroke-linecap="round">
+            <line x1="365" y1="200" x2="433.3" y2="200"/>
+            <line x1="365" y1="192" x2="365" y2="208"/><line x1="433.3" y1="192" x2="433.3" y2="208"/>
+          </g>
+          <circle cx="388.2" cy="200" r="8" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
+          <text x="388.2" y="185" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">0.167</text>
+        </svg>
+        <figcaption><b>3B and the human annotator have the same median and are statistically indistinguishable</b> (<i>p</i><sub>holm</sub> = .57, <i>r</i> = .09), while 0.5B and 1.5B do not differ from each other (<i>p</i><sub>holm</sub> = .57, <i>r</i> = .10) and both edit far more than the annotator (<i>r</i> = .50 / .46).</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Mean rank within each sentence</h2>
+      <figure>
+        <svg viewBox="0 0 600 230" role="img" aria-label="Mean Friedman rank per model">
+          <g stroke="#e1e0d9" stroke-width="1">
+            <line x1="200" y1="20" x2="200" y2="140"/>
+            <line x1="292.5" y1="20" x2="292.5" y2="140"/>
+            <line x1="477.5" y1="20" x2="477.5" y2="140"/>
+            <line x1="570" y1="20" x2="570" y2="140"/>
+          </g>
+          <line x1="385" y1="22" x2="385" y2="150" stroke="#c3c2b7" stroke-width="2"/>
+          <text x="385" y="16" font-size="15" fill="#898781" text-anchor="middle" font-family="system-ui,sans-serif">2.0 = no difference</text>
+          <line x1="200" y1="140" x2="570" y2="140" stroke="#c3c2b7" stroke-width="1"/>
+          <g font-size="15" fill="#898781" text-anchor="middle" font-family="system-ui,sans-serif">
+            <text x="200" y="162">1.0</text><text x="292.5" y="162">1.5</text>
+            <text x="385" y="162">2.0</text><text x="477.5" y="162">2.5</text><text x="570" y="162">3.0</text>
+            <text x="385" y="184" fill="#52514e" font-size="16">mean rank (lower = edits less)</text>
+          </g>
+          <g font-size="17" fill="#0b0b0b" text-anchor="end" font-family="system-ui,sans-serif">
+            <text x="186" y="40">0.5B</text><text x="186" y="77">1.5B</text><text x="186" y="114">3B</text>
+          </g>
+          <circle cx="411.4" cy="35" r="8" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+          <text x="429" y="41" font-size="18" font-weight="700" fill="#0b0b0b" font-family="system-ui,sans-serif">2.14</text>
+          <circle cx="406.3" cy="72" r="8" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+          <text x="424" y="78" font-size="18" font-weight="700" fill="#0b0b0b" font-family="system-ui,sans-serif">2.12</text>
+          <circle cx="337.4" cy="109" r="8" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
+          <text x="355" y="115" font-size="18" font-weight="700" fill="#0b0b0b" font-family="system-ui,sans-serif">1.74</text>
+        </svg>
+        <figcaption>Friedman χ²(2) = 25.64, <i>p</i> &lt; .001. <b>0.5B and 1.5B are nearly tied; 3B sits clearly below both</b> — the shape of a step rather than a gradient.</figcaption>
+      </figure>
+    </section>
+
+
+    <section>
+      <h2>One sentence, four conditions</h2>
+      <table class="ex">
+        <tr class="src"><td class="who">source</td><td class="sent">It 's difficult answer at the question " what are you going to do in the future ? " if the only one who has to know it is in two minds .</td><td class="mag">edits</td></tr>
+        <tr><td class="who">human</td><td class="sent">It 's difficult <b>to</b> answer the question " what are you going to do in the future ? " if the only one who has to know it is in two minds .</td><td class="mag">2 · .061</td></tr>
+        <tr><td class="who">3B</td><td class="sent">It's difficult <b>to</b> answer the question "What are you going to do in the future?" if the only one who has to know it is in two minds.</td><td class="mag">2 · .061</td></tr>
+        <tr><td class="who">1.5B</td><td class="sent">It's difficult <b>to</b> answer the question "What are you going to do in the future?" if <b>the person who knows must be</b> in two minds.</td><td class="mag">4 · .273</td></tr>
+        <tr><td class="who">0.5B</td><td class="sent">It's <b>challenging</b> to answer the question "What are you going to do in the future? " <b>when</b> the only one who <b>knows</b> it is <b>unsure</b>.</td><td class="mag">5 · .303</td></tr>
+      </table>
+      <p class="small" style="margin-top:4.5mm">Human makes exactly two minimal edits (insert <code>to</code>, delete <code>at</code>). <b>3B makes the same two</b> — its output is token-for-token the annotator's. 1.5B rewrites the subordinate clause. 0.5B also replaces <code>difficult</code>, <code>if</code> and <code>in two minds</code> — none of which contained a grammatical error.</p>
+    </section>
+
+  </div>
+
+  <div class="col">
+    <section>
+      <h2>Finding 2 · more fixed, less broken</h2>
+      <table>
+        <caption>ERRANT span-based scores against the gold correction (200 items, 553 gold edits)</caption>
+        <thead><tr><th>Model</th><th>TP</th><th>FP</th><th>FN</th><th>P</th><th>R</th><th>F<sub>0.5</sub></th><th>F<sub>0.5</sub><br>no ORTH</th></tr></thead>
+        <tbody>
+          <tr><td>0.5B</td><td>121</td><td>887</td><td>432</td><td>.120</td><td>.219</td><td>.132</td><td>.161</td></tr>
+          <tr><td>1.5B</td><td>163</td><td>900</td><td>390</td><td>.153</td><td>.295</td><td>.170</td><td>.208</td></tr>
+          <tr class="hi"><td>3B</td><td>181</td><td>724</td><td>372</td><td>.200</td><td>.327</td><td>.217</td><td>.289</td></tr>
+        </tbody>
+      </table>
+      <div class="todo" style="min-height:42mm; margin-top:5.5mm"><b>[你的文字：Finding 2 的解读]</b>
+        <span class="hint">约 30 词。3B 比 0.5B 多做对 60 处、少做无用 163 处；但 precision 仍只有 .20。</span></div>
+    </section>
+
+    <section>
+      <h2>How much gets changed per sentence</h2>
+      <figure>
+        <div class="legend"><span><i style="background:var(--model)"></i>Model</span><span><i style="background:var(--human)"></i>Human annotator</span></div>
+        <svg viewBox="0 0 600 330" role="img" aria-label="Mean number of ERRANT edits per sentence">
+          <g stroke="#e1e0d9" stroke-width="1">
+            <line x1="120" y1="280" x2="575" y2="280"/>
+            <line x1="120" y1="200" x2="575" y2="200"/>
+            <line x1="120" y1="120" x2="575" y2="120"/>
+            <line x1="120" y1="40"  x2="575" y2="40"/>
+          </g>
+          <g font-size="15" fill="#898781" text-anchor="end" font-family="system-ui,sans-serif">
+            <text x="108" y="286">0</text><text x="108" y="206">2</text>
+            <text x="108" y="126">4</text><text x="108" y="46">6</text>
+          </g>
+          <text x="20" y="160" font-size="16" fill="#52514e" transform="rotate(-90 20 160)" text-anchor="middle" font-family="system-ui,sans-serif">edits per sentence</text>
+          <line x1="120" y1="280" x2="575" y2="280" stroke="#c3c2b7" stroke-width="1"/>
+          <!-- bars: 4px rounded cap, square at baseline -->
+          <path d="M154.25 78.4 h44 v197.6 h-44 Z" fill="#2a78d6"/>
+          <path d="M154.25 82.4 a4 4 0 0 1 4 -4 h36 a4 4 0 0 1 4 4 Z" fill="#2a78d6"/>
+          <path d="M266.75 67.2 h44 v208.8 h-44 Z" fill="#2a78d6"/>
+          <path d="M266.75 71.2 a4 4 0 0 1 4 -4 h36 a4 4 0 0 1 4 4 Z" fill="#2a78d6"/>
+          <path d="M379.25 98.8 h44 v177.2 h-44 Z" fill="#2a78d6"/>
+          <path d="M379.25 102.8 a4 4 0 0 1 4 -4 h36 a4 4 0 0 1 4 4 Z" fill="#2a78d6"/>
+          <path d="M491.75 169.2 h44 v106.8 h-44 Z" fill="#eb6834"/>
+          <path d="M491.75 173.2 a4 4 0 0 1 4 -4 h36 a4 4 0 0 1 4 4 Z" fill="#eb6834"/>
+          <g font-size="19" font-weight="700" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">
+            <text x="176.25" y="68">5.04</text><text x="288.75" y="57">5.32</text>
+            <text x="401.25" y="88">4.53</text><text x="513.75" y="159">2.77</text>
+          </g>
+          <g font-size="17" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">
+            <text x="176.25" y="304">0.5B</text><text x="288.75" y="304">1.5B</text>
+            <text x="401.25" y="304">3B</text><text x="513.75" y="304">Human</text>
+          </g>
+        </svg>
+        <figcaption>Every model rewrites far more of each sentence than the annotator does. <b>Even 3B changes 1.6× as many spans as the human</b>, and its precision stays at .20 — most of what it changes, a human would have left alone.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Finding 3 · ORTH is an artefact</h2>
+      <table>
+        <caption>The ORTH category — casing and whitespace only</caption>
+        <thead><tr><th>Model</th><th>TP</th><th>FP</th><th>FN</th></tr></thead>
+        <tbody>
+          <tr><td>0.5B</td><td>7</td><td>251</td><td>12</td></tr>
+          <tr><td>1.5B</td><td>7</td><td>251</td><td>12</td></tr>
+          <tr><td>3B</td><td>7</td><td>278</td><td>12</td></tr>
+        </tbody>
+      </table>
+      <p class="small" style="margin-top:4.5mm">TP and FN are <b>identical</b> across all three conditions and FP varies by 11%, while total FP varies by 24%. This category tracks output formatting, not correction behaviour. Excluding it widens 3B's false-positive advantage over 0.5B from <b>18%</b> to <b>30%</b>.</p>
+    </section>
+
+    <section>
+      <h2>Conclusion</h2>
+      <div class="todo" style="min-height:58mm"><b>[你的文字：结论]</b>
+        <span class="hint">约 40–50 词。假设被推翻（参数多的模型 overcorrection 更少）；台阶位置；对"本地部署 + 教学用途"意味着什么。</span></div>
+      <div class="keys">
+        <div class="key"><div class="v">3B ≈ human</div><div class="l">edit magnitude: no detectable difference (<i>r</i> = .09)</div></div>
+        <div class="key"><div class="v">0.5B ≈ 1.5B</div><div class="l">no detectable difference either (<i>r</i> = .10)</div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<footer>
+  <div class="refs">
+    <h3>References</h3>
+    <p>Bryant, C., Felice, M., Andersen, Ø. E., &amp; Briscoe, T. (2019). The BEA-2019 shared task on grammatical error correction. <i>Proc. 14th Workshop on Innovative Use of NLP for Building Educational Applications</i>, 52–75.</p>
+    <p>Bryant, C., Felice, M., &amp; Briscoe, T. (2017). Automatic annotation and evaluation of error types for grammatical error correction. <i>Proc. ACL</i>, 793–805.</p>
+    <p>Charpentier, L. G. G., &amp; Samuel, D. (2024). GPT or BERT: Why not both? <i>The 2nd BabyLM Challenge (CoNLL)</i>, 262–283.</p>
+    <p>Kopylova, E. V., Tsegoeva, O. G., Berlin, V. A., Vyrenkova, A. S., &amp; Kuvshinskaya, Y. M. (2026). Correcting or rewriting? An expert evaluation of LLM-based GEC on academic learner data. <i>Dialogue 2026</i>, <i>24</i>, 257–266.</p>
+    <p>Qwen Team. (2025). <i>Qwen2.5 technical report</i> (arXiv:2412.15115).</p>
+    <p>Warstadt, A., et al. (2023). Findings of the BabyLM Challenge. <i>BabyLM Challenge (CoNLL)</i>, 1–34.</p>
+  </div>
+  <div class="repo">
+    <h3>Code &amp; materials</h3>
+    <p class="url">[REPO URL]</p>
+    <p class="tiny">Corpus text is not redistributed (W&amp;I+LOCNESS licence §6). The repository ships the sampling manifest (ids + seed + checksum), the manual annotation of model commentary, all analysis code, and the per-item measurement table.</p>
+  </div>
+</footer>
+
+</body>
+</html>

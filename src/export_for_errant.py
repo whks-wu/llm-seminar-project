@@ -3,6 +3,7 @@
 export_for_errant.py — write the parallel plain-text files ERRANT needs.
 
 Input : results/pilot_outputs_qwensfamily_02_200.csv
+        notes/preamble_suffix_manual.csv   (via compute_magnitude.load_data)
 Output: results/errant/source.txt, gold.txt, hyp_<model>.txt
         one sentence per line, identical ordering in every file.
 
@@ -13,75 +14,74 @@ extracted by a modern ERRANT mixes two tokenisers and produces spurious mismatch
 Running errant_parallel over (source, gold) with the *same* ERRANT that processes the
 model output puts both sides through identical tokenisation.
 
-This also removes the need for the hand-written normalisation used in the first analysis:
-spaCy tokenises "It 's" and "It's" to the same two tokens.
+Why the cleaning is imported rather than reimplemented
+------------------------------------------------------
+The edit-magnitude analysis and the ERRANT analysis must see the same cleaned output,
+or the two tables in the report describe two different post-processings. Both therefore
+call compute_magnitude.strip_commentary with the same manual annotation file. The earlier
+version of this script used its own regex, which stripped a different set of preambles,
+removed no trailing commentary, and reduced multi-line outputs to their last line.
 
 Usage:
     python src/export_for_errant.py
 Then, in the ERRANT environment:
     source .venv-errant/bin/activate
     cd results/errant
-    errant_parallel -orig source.txt -cor gold.txt          -out ref.m2
-    errant_parallel -orig source.txt -cor hyp_Qwen2.5-0.5B.txt -out hyp_0.5B.m2
+    errant_parallel -orig source.txt -cor gold.txt                 -out ref.m2
+    errant_parallel -orig source.txt -cor hyp_Qwen2.5-0.5B.txt     -out hyp_0.5B.m2
     errant_compare  -hyp hyp_0.5B.m2 -ref ref.m2
 """
 
 import re
 from pathlib import Path
-import pandas as pd
+
+from compute_magnitude import load_data, strip_commentary
 
 ROOT = Path(__file__).resolve().parent.parent
-IN_PATH = ROOT / "results/pilot_outputs_qwensfamily_02_200.csv"
 OUT_DIR = ROOT / "results/errant"
 
-# Same preamble rule as the first analysis, applied identically to every condition.
-PRE = re.compile(
-    r'^(?:the corrected[^:]*|here (?:is|are)[^:]*|corrected[^:]*|the sentence[^:]*|'
-    r'i apologize[^:]*|sure[^:]*|certainly[^:]*)\s*:\s*', re.I)
 
+def flatten(text):
+    """Collapse all whitespace to single spaces.
 
-def clean(text):
-    """Strip a framing preamble and flatten to a single line.
-
-    ERRANT reads one sentence per line, so any newline in a model output would shift
-    every subsequent line and silently misalign the whole file.
+    ERRANT reads one sentence per line, so a newline inside a model output would shift
+    every following line and silently misalign the whole file. Newlines are treated as
+    ordinary whitespace, not as a signal to keep only the last line: in A.dev.0898 the
+    models put the letter's salutation ("Hello Riley,") on a line of its own, and taking
+    the last line would delete three words that belong to the sentence.
     """
-    s = str(text).strip()
-    s2 = PRE.sub("", s).strip()
-    if "\n" in s2:
-        s2 = s2.split("\n")[-1].strip()
-    s2 = s2.strip('"“”').strip()
-    s2 = re.sub(r"\s+", " ", s2 or s)
-    return s2 or "."          # never emit a blank line
+    return re.sub(r"\s+", " ", str(text)).strip()
 
 
 def main():
-    d = pd.read_csv(IN_PATH).fillna("")
+    d = load_data()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    d["clean"] = d.apply(
+        lambda r: strip_commentary(r.parsed_output, r.preamble, r.suffix), axis=1)
 
     ids = sorted(d["id"].unique())          # fixed order shared by every file
     base = d.drop_duplicates("id").set_index("id")
 
     def write(name, lines):
+        assert all(lines), f"{name}: blank line would misalign the file"
         p = OUT_DIR / name
         p.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        return p, len(lines)
+        print(f"{p.name:<28} {len(lines)} lines")
 
-    p, n = write("source.txt", [re.sub(r"\s+", " ", str(base.loc[i, "source"])).strip() for i in ids])
-    print(f"{p.name:<28} {n} lines")
-    p, n = write("gold.txt", [re.sub(r"\s+", " ", str(base.loc[i, "gold_correction"])).strip() for i in ids])
-    print(f"{p.name:<28} {n} lines")
+    write("source.txt", [flatten(base.loc[i, "source"]) for i in ids])
+    write("gold.txt", [flatten(base.loc[i, "gold_correction"]) for i in ids])
 
     for model in sorted(d["model"].unique()):
         g = d[d["model"] == model].set_index("id")
-        p, n = write(f"hyp_{model}.txt", [clean(g.loc[i, "parsed_output"]) for i in ids])
-        print(f"{p.name:<28} {n} lines")
+        write(f"hyp_{model}.txt", [flatten(g.loc[i, "clean"]) for i in ids])
 
     # alignment check: every file must have the same number of lines
     counts = {f.name: len(f.read_text(encoding="utf-8").rstrip("\n").split("\n"))
-              for f in sorted(OUT_DIR.glob("*.txt"))}
+              for f in sorted(OUT_DIR.glob("*.txt")) if not f.name.startswith("OLD_")}
     assert len(set(counts.values())) == 1, f"line counts differ: {counts}"
-    print(f"\nall files aligned at {set(counts.values()).pop()} lines -> {OUT_DIR.relative_to(ROOT)}")
+    print(f"\nall files aligned at {set(counts.values()).pop()} lines "
+          f"-> {OUT_DIR.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

@@ -46,9 +46,7 @@ Human annotator corrections serve as a fourth (non-model) reference point.
 ## 4. Post-processing (applied identically to all three conditions)
 
 **(a) Preamble removal.** Some outputs prefix the correction with a framing clause.
-Rate: 3/200 (0.5B), 14/200 (1.5B), 1/200 (3B). Rule: strip a leading clause matching
-`(the corrected|here is/are|corrected|the sentence|i apologize|sure|certainly)...:`,
-take the last line if newlines remain, strip enclosing quotes.
+Rate: 7/200 (0.5B), 15/200 (1.5B), 0/200 (3B). I manually searched for the prefaces myself, highlighted them in green in pilot_outputs_qwensfamily_02_200.csv, and then extracted them separately and saved them in preamble_manual.csv.
 
 **(b) Tokenisation normalisation.** The corpus is pre-tokenised (`It 's`, punctuation as
 separate tokens); model output is natural text (`It's`). Without normalisation these
