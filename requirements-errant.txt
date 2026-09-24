@@ -1,0 +1,14 @@
+# ERRANT environment (.venv-errant) — scoring only, kept separate on purpose.
+#
+# ERRANT 3.0.2 is built against the numpy 1.x C ABI. Installing it into an
+# environment that already has numpy 2.x raises
+#     ValueError: numpy.dtype size changed, may indicate binary incompatibility
+# at import time. Install numpy first, then errant, then the spaCy model:
+#
+#     python3 -m venv .venv-errant && source .venv-errant/bin/activate
+#     pip install -r requirements-errant.txt
+#     python -m spacy download en_core_web_sm
+#
+numpy<2
+errant==3.0.2
+spacy==3.8.16

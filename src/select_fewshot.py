@@ -1,27 +1,6 @@
 #!/usr/bin/env python3
 """
-select_fewshot.py — sample few-shot demonstration examples from the TRAINING split.
-
-Why a script and not hand-picking
----------------------------------
-Few-shot examples implicitly demonstrate *how much* to edit, so the choice of examples
-biases every model's editing behaviour. Hand-picking would make that bias arbitrary and
-undocumentable. This script samples with a fixed seed so that:
-
-  - the examples can be regenerated exactly,
-  - the selection rule can be stated in the report, and
-  - the edit-count distribution of the examples approximates the corpus itself
-    rather than being uniformly minimal.
-
-Source: data/raw/wi+locness/m2/A.train.gold.bea19.m2  (CEFR A, TRAINING split)
-This is disjoint from A.dev, which the test sample comes from — examples must never
-overlap the evaluation items.
-
-Output: notes/fewshot_examples.json  (reviewed by hand before use)
-
-Usage:
-    python src/select_fewshot.py            # default seed
-    python src/select_fewshot.py 7          # different seed, to re-roll
+sample few-shot demonstration examples from the TRAINING split.
 """
 
 import json

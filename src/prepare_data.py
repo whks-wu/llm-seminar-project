@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-prepare_data.py — build the frozen stimulus set for the overcorrection experiment.
+build the frozen stimulus set for the overcorrection experiment.
 
 Input : data/raw/wi+locness/m2/A.dev.gold.bea19.m2
         (CEFR level A = A1+A2 learners, BEA-2019 dev split, 1037 sentences)
@@ -12,37 +12,6 @@ Output: data/processed/sample.jsonl
           gold_edits       [{start, end, type, correction}, ...] on source token indices
           n_gold_edits     number of real (non-noop) edits
           n_tokens         length of source in whitespace tokens
-
-Why this file exists
---------------------
-Every model sees exactly the same `source` strings, which makes the comparison PAIRED
-(required for the Friedman / Wilcoxon analysis). `gold_correction` is what ERRANT scores
-each model against, which is what makes recall (the capability gate) and false-positive
-edits (the primary overcorrection measure) computable at all.
-
-The sample is frozen with a fixed seed and committed to the repository so that results
-are reproducible and so that "sentence 42" means the same sentence in every condition.
-
-M2 format
----------
-    S <whitespace-tokenised source sentence>
-    A <start> <end>|||<type>|||<correction>|||REQUIRED|||-NONE-|||<annotator_id>
-    <blank line ends the sentence block>
-
-Token offsets are 0-based and end-exclusive into source.split().
-    start == end        -> insertion   (M: missing)
-    correction == ""    -> deletion    (U: unnecessary)
-    otherwise           -> replacement (R:)
-    "A -1 -1|||noop|||" -> sentence contains no errors
-
-NOTE: the M2 file does NOT store the corrected sentence. It stores the source plus a list
-of edit operations, so the corrected sentence must be reconstructed by applying them.
-
-Usage
------
-    python src/prepare_data.py
-
-Run from the repository root with the virtualenv active. No third-party dependencies.
 """
 
 import hashlib
@@ -50,62 +19,30 @@ import json
 import random
 from pathlib import Path
 
-# ---------------------------------------------------------------------------
-# CONFIG — these encode the design decisions recorded in notes/decisions.md (D5).
-# Change them here, not inline, and update D5 if you do.
-# ---------------------------------------------------------------------------
-
-# Paths are resolved relative to this file, not the shell's working directory, so the
-# script runs correctly from anywhere (e.g. a VS Code terminal opened elsewhere).
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 M2_PATH = REPO_ROOT / "data/raw/wi+locness/m2/A.dev.gold.bea19.m2"
 OUT_PATH = REPO_ROOT / "data/processed/sample.jsonl"
 
-# The W&I licence (clause 6) permits publishing excerpts of FEWER THAN 100 WORDS. The
-# sample contains ~3,500 words, so sample.jsonl is git-ignored and must never be pushed.
-# The manifest below carries only item ids, the config, and a checksum — enough for anyone
-# to download the corpus themselves and regenerate a byte-identical sample.
+# The W&I licence (clause 6) permits publishing excerpts of FEWER THAN 100 WORDS.
 MANIFEST_PATH = REPO_ROOT / "data/processed/sample_manifest.json"
 
 SAMPLE_SIZE = 200
-RANDOM_SEED = 42          # fixed: do NOT reroll if you dislike the sample
+RANDOM_SEED = 42
 
-MIN_TOKENS = 5            # D5: below this, length-normalised edit distance is unstable
-MAX_TOKENS = 40           # D5: above this, CPU inference gets slow for the 3B model
+MIN_TOKENS = 5
+MAX_TOKENS = 40
 
-# D5: drop sentences whose ONLY edits are punctuation or orthography. The research
-# question is about grammar, and the corpus readme notes punctuation handling was
-# arbitrary before release v2.0.
 DROP_PUNCT_ONLY_SENTENCES = True
-
-# D5 (settled 11.09): spelling and orthography edits are KEPT, in the reference and in the
-# metrics. This follows BEA-2019 convention, where grammatical error correction includes
-# spelling, and it keeps scoring unbiased.
-#
-# Do not set this to False. Removing SPELL/ORTH edits from gold_correction would leave the
-# misspelling in the reference; a model that fixes the spelling would then differ from the
-# reference and be scored as a FALSE POSITIVE, i.e. as "overcorrection". Large models fix
-# spelling, small ones often do not, so that setting would bias the result toward the
-# hypothesis for reasons unrelated to model behaviour.
-#
-# Every edit's type is preserved in the output, so a grammar-only secondary analysis remains
-# possible at metric time without regenerating the sample.
 KEEP_SPELL_ORTH_IN_GOLD = True
 
 PUNCT_TYPES = {"M:PUNCT", "R:PUNCT", "U:PUNCT"}
 ORTH_TYPES = {"M:ORTH", "R:ORTH", "U:ORTH"}
 SPELL_TYPES = {"M:SPELL", "R:SPELL", "U:SPELL"}
 
-# D5: keep UNK edits — ERRANT could not classify them, but they are real human edits and
-# dropping them would leave gold_correction incomplete.
 DROP_UNK_SENTENCES = False
 
-
-# ---------------------------------------------------------------------------
 # Parsing
-# ---------------------------------------------------------------------------
-
 def parse_m2(path):
     """Yield (source_string, edits) per sentence block.
 
@@ -150,7 +87,7 @@ def apply_edits(source, edits):
     ordered = sorted(edits, key=lambda e: (e["start"], e["end"]))
     for edit in reversed(ordered):
         start, end = edit["start"], edit["end"]
-        if start < 0:                      # defensive: noop should already be filtered
+        if start < 0:
             continue
         if not (0 <= start <= end <= len(tokens)):
             raise ValueError(
@@ -159,11 +96,7 @@ def apply_edits(source, edits):
         tokens[start:end] = edit["correction"].split()
     return " ".join(tokens)
 
-
-# ---------------------------------------------------------------------------
 # Filtering
-# ---------------------------------------------------------------------------
-
 def keep_sentence(source, edits):
     """Apply the D5 inclusion criteria. Returns (bool, reason_if_rejected)."""
     if not edits:
@@ -183,11 +116,6 @@ def keep_sentence(source, edits):
 
     return True, None
 
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
 def main():
     if not M2_PATH.exists():
         raise SystemExit(f"Corpus not found at {M2_PATH}.")
@@ -206,14 +134,11 @@ def main():
 
         # Some ERRANT UNK annotations record a "correction" identical to the source
         # (e.g. 'pasted' -> 'pasted'): the annotator flagged a span but no actual
-        # correction is recoverable. Recall can never exceed 0 on these, so they would
-        # sit in the data as permanent failures for every model. Drop them.
+        # correction is recoverable.
         if gold == " ".join(source.split()):
             rejected["no_effective_change"] = rejected.get("no_effective_change", 0) + 1
             continue
 
-        # Sanity check: applying zero edits must be the identity. Cheap, catches a
-        # whole class of off-by-one mistakes in apply_edits().
         assert apply_edits(source, []) == " ".join(source.split())
 
         kept.append({
@@ -232,7 +157,7 @@ def main():
 
     rng = random.Random(RANDOM_SEED)
     sample = rng.sample(kept, SAMPLE_SIZE)
-    sample.sort(key=lambda item: item["id"])          # stable, readable ordering
+    sample.sort(key=lambda item: item["id"])
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as fh:
@@ -264,7 +189,7 @@ def main():
     print(f"manifest                 : {MANIFEST_PATH}")
     print(f"sample.jsonl sha256      : {digest[:16]}...")
 
-    # ----- summary -----------------------------------------------------------
+    # summary 
     print(f"eligible after filtering : {len(kept)}")
     print(f"rejected                 : {rejected}")
     print(f"written                  : {len(sample)} -> {OUT_PATH}")
@@ -280,7 +205,6 @@ def main():
         print(f"  source: {item['source']}")
         print(f"  gold  : {item['gold_correction']}")
         print(f"  edits : {[(e['type'], e['correction']) for e in item['gold_edits']]}")
-
 
 if __name__ == "__main__":
     main()

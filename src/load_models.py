@@ -8,7 +8,7 @@ warnings.filterwarnings("ignore", message=".*do_sample.*")
 
 # Three conditions on one ordered scale of PARAMETER COUNT. Same family, so pretraining
 # data, instruction tuning, architecture and tokenizer are held constant and only size
-# varies. See notes/decisions.md D3/D4 for why the BabyLM/GPT-2 conditions were dropped.
+# varies.
 MODELS = {
     "Qwen2.5-0.5B": {
         "model_id": "Qwen/Qwen2.5-0.5B-Instruct",

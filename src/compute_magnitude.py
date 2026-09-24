@@ -16,25 +16,21 @@ CLITICS = ["'s", "n't", "'re", "'ve", "'ll", "'d", "'m"]
 PUNCTUATION = ',.!?;:()"'
 PUNCT_RE = re.compile("([" + re.escape(PUNCTUATION) + "])")
 
-def load_data() -> pd.DataFrame:
+def load_data():
     """Read the generation results and the manual annotations of model
     commentary, join them, and check that the data is shaped the way the
     analysis assumes.
 
     Returns the 600-row long table with two extra columns: `preamble` and
-    `suffix` — the exact framing clauses to strip from the output, or NaN
-    where the output has none.
+    `suffix`.
     """
     df = pd.read_csv(RESULT_PATH)
 
-    # --- the generation results -------------------------------------------
     assert set(df["model"]) == set(MODELS), sorted(set(df["model"]))
 
     per_model = df.groupby("model").size()
     assert (per_model == N_ITEMS).all(), per_model.to_dict()
 
-    # every model must have been run on the same 200 sentences, or the
-    # conditions cannot be compared pairwise
     id_sets = {m: set(g["id"]) for m, g in df.groupby("model")}
     reference = id_sets[MODELS[0]]
     assert len(reference) == N_ITEMS, len(reference)
@@ -49,7 +45,7 @@ def load_data() -> pd.DataFrame:
     # run_pilot.py writes a message here when a generation fails
     assert df["error"].isna().all(), df.loc[df["error"].notna(), ["id", "model", "error"]]
 
-    # --- the manual annotations of model commentary -----------------------
+    # the manual annotations
     manual = pd.read_csv(MANUAL_PATH, dtype=str)
     assert list(manual.columns) == ["id", "model", "preamble", "suffix"], list(manual.columns)
     assert not manual.duplicated(["id", "model"]).any(), \
@@ -59,7 +55,7 @@ def load_data() -> pd.DataFrame:
     assert (manual["preamble"].notna() | manual["suffix"].notna()).all(), \
         manual[manual["preamble"].isna() & manual["suffix"].isna()]
 
-    # --- join -------------------------------------------------------------
+    # join 
     n_before = len(df)
     df = df.merge(manual, on=["id", "model"], how="left", validate="one_to_one")
     assert len(df) == n_before, (n_before, len(df))

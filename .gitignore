@@ -30,3 +30,6 @@ notes/fewshot_examples.json
 reference/
 finalprojects.pdf
 results/tables/OLD_*
+
+# 写自我声明用的工作笔记，不是交付物
+notes/ai-use-log.md

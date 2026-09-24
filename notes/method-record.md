@@ -45,8 +45,10 @@ Human annotator corrections serve as a fourth (non-model) reference point.
 
 ## 4. Post-processing (applied identically to all three conditions)
 
-**(a) Preamble removal.** Some outputs prefix the correction with a framing clause.
-Rate: 7/200 (0.5B), 15/200 (1.5B), 0/200 (3B). I manually searched for the prefaces myself, highlighted them in green in pilot_outputs_qwensfamily_02_200.csv, and then extracted them separately and saved them in preamble_manual.csv.
+**(a) Preamble and suffix removal.** Some outputs prefix the correction with a framing clause.
+Preamble 7/200 (0.5B), 15/200 (1.5B), 0/200 (3B)
+suffix 0/200 (0.5B), 2/200 (1.5B), 5/200 (3B)
+I manually searched for the prefaces and suffix myself in pilot_outputs_qwensfamily_02_200.csv, and then extracted them separately and saved them in preamble_suffix_manual.csv.
 
 **(b) Tokenisation normalisation.** The corpus is pre-tokenised (`It 's`, punctuation as
 separate tokens); model output is natural text (`It's`). Without normalisation these
@@ -54,10 +56,10 @@ differences count as edits. Steps: unify quote characters; remove space before p
 split clitics (`'s`, `n't`, `'re`, ...) into separate tokens; separate punctuation;
 lowercase. Applied to source, gold and model output alike.
 
-**Effect (same 200 items): median edit magnitude fell from 0.375-0.438 to 0.167-0.250.**
+**Effect (same 200 items): median edit magnitude fell from 0.375-0.438 to 0.167-0.244.**
 43-56% of the raw distance was tokenisation artefact, not model behaviour.
 
-**Caveat to state:** (a) and (b) are hand-written heuristics, not ERRANT/spaCy. Results
+**Caveat to state:** (a) and (b) are hand-Manual, line-by-line review, not ERRANT/spaCy. Results
 are sensitive to them. ERRANT tokenises both sides with spaCy and is the proper tool.
 
 ### Why the shipped gold M2 was NOT used as the ERRANT reference
@@ -109,7 +111,7 @@ Normalising by length makes long and short sentences comparable (3 words changed
 **Paired throughout** — the same 200 sentences pass through all three models, so
 between-sentence variance is removed.
 
-- **Friedman test** (non-parametric repeated-measures ANOVA): rank the three conditions
+- **Friedman test** (non-parametric repeated-measures ANOVA): rank the three conditions, Friedman used parallel correction
   within each sentence, compare rank sums. df = k-1 = 2.
 - **Post-hoc pairwise Wilcoxon signed-rank**: per-sentence differences, zeros dropped,
   absolute differences ranked, W+ vs W- compared. Normal approximation (n >= 144).

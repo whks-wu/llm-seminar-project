@@ -1,5 +1,5 @@
 """
-run_pilot.py — run every (model x prompt variant x sentence) combination and record
+run every (model x prompt variant x sentence) combination and record
 the raw and parsed outputs.
 
 Inputs : data/processed/sample.jsonl (first N_ITEMS rows)
@@ -10,12 +10,6 @@ Outputs: results/pilot_outputs.csv
 
 Models are loaded once each and released afterwards: the outer loop is over models, not
 over sentences, so the 3B model is not reloaded 40 times.
-
-Usage:
-    python src/run_pilot.py
-
-To reuse for the full run, change N_ITEMS, VARIANTS and OUT_PATH below — the logic is
-unchanged, so no second script is needed.
 """
 
 import gc

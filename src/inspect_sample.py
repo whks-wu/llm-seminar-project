@@ -1,21 +1,11 @@
 #!/usr/bin/env python3
 """
-inspect_sample.py — manual verification of the M2 edit reconstruction.
+manual verification of the M2 edit reconstruction.
 
 Prints, for a random handful of items in data/processed/sample.jsonl:
   (A) what the M2 annotation SAYS should change, and
   (B) what ACTUALLY differs between `source` and `gold_correction`, computed
       independently with difflib.
-
-(A) comes from the annotation; (B) is derived from the reconstructed strings. If the two
-disagree, apply_edits() has an offset bug. This is the check a human has to make — the
-script can align the two lists, but only you can judge whether the corrected sentence is
-plausible English.
-
-Usage:
-    python src/inspect_sample.py            # 5 random items
-    python src/inspect_sample.py 10         # 10 random items
-    python src/inspect_sample.py 5 123      # 5 items, seed 123
 """
 
 import difflib
@@ -90,7 +80,6 @@ What to look for:
   4. Count mismatches are not automatically wrong: two adjacent edits can merge into one
      diff region. Read those cases rather than trusting the number.
 """)
-
 
 if __name__ == "__main__":
     main()

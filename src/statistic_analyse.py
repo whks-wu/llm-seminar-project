@@ -1,11 +1,10 @@
 """
+Use these statistic methods
 Friedman: Are there any differences between the three models?
 Wilcoxon signed-rank: Which two are different, specifically?
 Holm: Why did the models comparison become non-significant?
 rank-biserial r: How big is the difference?
 bootstrap CI: How stable is the median?
-Average Rank
-
 """
 from pathlib import Path
 import numpy as np
@@ -172,7 +171,6 @@ def main():
     print(f"\nwritten: {MEDIAN_PATH.name}, {FRIEDMAN_PATH.name}, "
           f"{STATS_PATH.name}, {ENV_PATH.name}")
     
-
 
 if __name__ == "__main__":
     main()

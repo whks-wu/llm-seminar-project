@@ -6,30 +6,6 @@ Input : results/pilot_outputs_qwensfamily_02_200.csv
         notes/preamble_suffix_manual.csv   (via compute_magnitude.load_data)
 Output: results/errant/source.txt, gold.txt, hyp_<model>.txt
         one sentence per line, identical ordering in every file.
-
-Why regenerate the reference instead of using A.dev.gold.bea19.m2
------------------------------------------------------------------
-The shipped M2 was built with spaCy 1.9.0 (corpus readme). Scoring it against edits
-extracted by a modern ERRANT mixes two tokenisers and produces spurious mismatches.
-Running errant_parallel over (source, gold) with the *same* ERRANT that processes the
-model output puts both sides through identical tokenisation.
-
-Why the cleaning is imported rather than reimplemented
-------------------------------------------------------
-The edit-magnitude analysis and the ERRANT analysis must see the same cleaned output,
-or the two tables in the report describe two different post-processings. Both therefore
-call compute_magnitude.strip_commentary with the same manual annotation file. The earlier
-version of this script used its own regex, which stripped a different set of preambles,
-removed no trailing commentary, and reduced multi-line outputs to their last line.
-
-Usage:
-    python src/export_for_errant.py
-Then, in the ERRANT environment:
-    source .venv-errant/bin/activate
-    cd results/errant
-    errant_parallel -orig source.txt -cor gold.txt                 -out ref.m2
-    errant_parallel -orig source.txt -cor hyp_Qwen2.5-0.5B.txt     -out hyp_0.5B.m2
-    errant_compare  -hyp hyp_0.5B.m2 -ref ref.m2
 """
 
 import re
@@ -42,14 +18,7 @@ OUT_DIR = ROOT / "results/errant"
 
 
 def flatten(text):
-    """Collapse all whitespace to single spaces.
-
-    ERRANT reads one sentence per line, so a newline inside a model output would shift
-    every following line and silently misalign the whole file. Newlines are treated as
-    ordinary whitespace, not as a signal to keep only the last line: in A.dev.0898 the
-    models put the letter's salutation ("Hello Riley,") on a line of its own, and taking
-    the last line would delete three words that belong to the sentence.
-    """
+    """Collapse all whitespace to single spaces."""
     return re.sub(r"\s+", " ", str(text)).strip()
 
 
