@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-export_for_errant.py — write the parallel plain-text files ERRANT needs.
+Create the parallel plaintext files required for ERRANT.
 
 Input : results/pilot_outputs_qwensfamily_02_200.csv
         notes/preamble_suffix_manual.csv   (via compute_magnitude.load_data)
@@ -10,22 +10,19 @@ Output: results/errant/source.txt, gold.txt, hyp_<model>.txt
 
 import re
 from pathlib import Path
-
 from compute_magnitude import load_data, strip_commentary
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "results/errant"
 
-
 def flatten(text):
     """Collapse all whitespace to single spaces."""
     return re.sub(r"\s+", " ", str(text)).strip()
 
-
 def main():
     d = load_data()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-
+    # clean every row
     d["clean"] = d.apply(
         lambda r: strip_commentary(r.parsed_output, r.preamble, r.suffix), axis=1)
 
@@ -34,7 +31,7 @@ def main():
 
     def write(name, lines):
         assert all(lines), f"{name}: blank line would misalign the file"
-        p = OUT_DIR / name
+        p = OUT_DIR / name #  builds the output file path.
         p.write_text("\n".join(lines) + "\n", encoding="utf-8")
         print(f"{p.name:<28} {len(lines)} lines")
 

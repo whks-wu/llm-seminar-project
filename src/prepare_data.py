@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-build the frozen stimulus set for the overcorrection experiment.
+build the sample for the overcorrection experiment.
 
 Input : data/raw/wi+locness/m2/A.dev.gold.bea19.m2
         (CEFR level A = A1+A2 learners, BEA-2019 dev split, 1037 sentences)
@@ -44,8 +44,7 @@ DROP_UNK_SENTENCES = False
 
 # Parsing
 def parse_m2(path):
-    """Yield (source_string, edits) per sentence block.
-
+    """Yield source_string and edits per sentence block.
     edits is a list of dicts with keys start, end, type, correction, annotator.
     noop markers are dropped, so a clean sentence yields an empty list.
     """
@@ -98,7 +97,7 @@ def apply_edits(source, edits):
 
 # Filtering
 def keep_sentence(source, edits):
-    """Apply the D5 inclusion criteria. Returns (bool, reason_if_rejected)."""
+    """Apply the D5 inclusion criteria. Returns bool, reason_if_rejected."""
     if not edits:
         return False, "noop"
 

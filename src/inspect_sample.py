@@ -17,7 +17,6 @@ from pathlib import Path
 # Resolved relative to this file, so the script runs from any working directory.
 SAMPLE_PATH = Path(__file__).resolve().parent.parent / "data/processed/sample.jsonl"
 
-
 def actual_changes(source, gold):
     """Word-level diff between the two strings, independent of the annotation."""
     a, b = source.split(), gold.split()
@@ -33,7 +32,6 @@ def actual_changes(source, gold):
         else:
             out.append(f'"{before}" -> "{after}"')
     return out
-
 
 def main():
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 5

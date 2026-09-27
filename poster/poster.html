@@ -10,7 +10,6 @@
     --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
     --grid:#e1e0d9; --axis:#c3c2b7; --rule:rgba(11,11,11,.10);
     --model:#2a78d6; --human:#eb6834;
-    --todo-bg:#eef4fd; --todo-br:#9ec5f4; --todo-ink:#184f95;
   }
   *{box-sizing:border-box; margin:0; padding:0}
   html,body{background:var(--surface)}
@@ -27,54 +26,52 @@
   .byline .where{font-size:8mm; color:var(--ink-2); line-height:1.35; text-align:right}
 
   .cols{flex:1 1 auto; display:grid; grid-template-columns:1fr 1fr 1fr; gap:20mm; padding:12mm 0}
-  .col{display:flex; flex-direction:column; justify-content:space-between; gap:10mm}
+  .col{display:flex; flex-direction:column; justify-content:space-between; gap:9.2mm}
   section{break-inside:avoid}
-  h2{font-size:15mm; font-weight:700; letter-spacing:-.15mm;
-     padding-bottom:2.4mm; margin-bottom:5mm; border-bottom:.7mm solid var(--ink)}
-  p{font-size:10.5mm; line-height:1.45}
-  .small{font-size:9.2mm; line-height:1.42; color:var(--ink-2)}
-  .tiny{font-size:6.6mm; line-height:1.38; color:var(--ink-2)}
+  h2{font-size:13.8mm; font-weight:700; letter-spacing:-.15mm;
+     padding-bottom:2.21mm; margin-bottom:4.6mm; border-bottom:.7mm solid var(--ink)}
+  p{font-size:9.66mm; line-height:1.45}
+  .small{font-size:8.46mm; line-height:1.42; color:var(--ink-2)}
+  .tiny{font-size:6.07mm; line-height:1.38; color:var(--ink-2)}
   b{font-weight:700}
 
-  .todo{background:var(--todo-bg); border:.5mm dashed var(--todo-br); border-radius:2mm;
-        padding:7mm; font-size:9.5mm; line-height:1.42; color:var(--todo-ink)}
-  .todo .hint{display:block; margin-top:3.5mm; font-size:7.8mm; color:#256abf}
+  p+p{margin-top:3.68mm}
 
-  dl.spec{font-size:9.5mm; line-height:1.4}
-  dl.spec div{display:grid; grid-template-columns:58mm 1fr; gap:5mm;
-              padding:3.6mm 0; border-top:.3mm solid var(--rule)}
+  dl.spec{font-size:8.74mm; line-height:1.4}
+  dl.spec div{display:grid; grid-template-columns:53.36mm 1fr; gap:4.6mm;
+              padding:3.31mm 0; border-top:.3mm solid var(--rule)}
   dl.spec div:first-child{border-top:0}
-  dl.spec dt{color:var(--muted); font-weight:600; padding-right:2mm; hyphens:auto}
+  dl.spec dt{color:var(--muted); font-weight:600; padding-right:1.84mm; hyphens:auto}
   code{font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:.9em}
 
-  table{width:100%; border-collapse:collapse; font-size:9.4mm; font-variant-numeric:tabular-nums}
-  caption{text-align:left; font-size:8.4mm; color:var(--ink-2); padding-bottom:3mm; line-height:1.35}
-  th,td{padding:3.4mm 1.5mm; text-align:right}
+  table{width:100%; border-collapse:collapse; font-size:8.65mm; font-variant-numeric:tabular-nums}
+  caption{text-align:left; font-size:7.73mm; color:var(--ink-2); padding-bottom:2.76mm; line-height:1.35}
+  th,td{padding:3.13mm 1.5mm; text-align:right}
   th:first-child,td:first-child{text-align:left}
-  thead th{border-bottom:.6mm solid var(--ink); font-weight:650; font-size:8.2mm; color:var(--ink-2)}
+  thead th{border-bottom:.6mm solid var(--ink); font-weight:650; font-size:7.54mm; color:var(--ink-2)}
   tbody tr+tr td{border-top:.3mm solid var(--rule)}
   tbody tr.hi td{font-weight:700}
 
 
-  table.ex{font-size:7mm; line-height:1.34; font-variant-numeric:normal}
-  table.ex td{padding:2.8mm 0; text-align:left; vertical-align:top}
-  table.ex td.who{width:30mm; padding-right:5mm; color:var(--muted); font-weight:650; white-space:nowrap}
-  table.ex td.mag{width:22mm; padding-left:4mm; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2); white-space:nowrap}
-  table.ex td.sent{font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:6.6mm; line-height:1.38}
+  table.ex{font-size:6.44mm; line-height:1.34; font-variant-numeric:normal}
+  table.ex td{padding:2.58mm 0; text-align:left; vertical-align:top}
+  table.ex td.who{width:30mm; padding-right:4.6mm; color:var(--muted); font-weight:650; white-space:nowrap}
+  table.ex td.mag{width:22mm; padding-left:3.68mm; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink-2); white-space:nowrap}
+  table.ex td.sent{font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:6.07mm; line-height:1.38}
   table.ex tr.src td{border-bottom:.5mm solid var(--rule)}
   table.ex tr+tr td{border-top:.3mm solid var(--rule)}
   figure{margin:0}
-  figcaption{font-size:8.6mm; line-height:1.4; color:var(--ink-2); margin-top:3.5mm}
+  figcaption{font-size:7.91mm; line-height:1.4; color:var(--ink-2); margin-top:3.22mm}
   figcaption b{color:var(--ink); font-weight:650}
   svg{width:100%; height:auto; display:block}
-  .legend{display:flex; gap:11mm; align-items:center; font-size:8.6mm; color:var(--ink-2); margin-bottom:3.5mm}
-  .legend span{display:inline-flex; align-items:center; gap:2.8mm}
+  .legend{display:flex; gap:10.12mm; align-items:center; font-size:7.91mm; color:var(--ink-2); margin-bottom:3.22mm}
+  .legend span{display:inline-flex; align-items:center; gap:2.58mm}
   .legend i{width:5.5mm; height:5.5mm; border-radius:50%; display:inline-block}
 
-  .keys{display:grid; grid-template-columns:1fr 1fr; gap:6mm; margin-top:6mm}
-  .key{background:var(--plane); border-radius:2.5mm; padding:6mm}
-  .key .v{font-size:14mm; font-weight:700; line-height:1}
-  .key .l{font-size:8mm; color:var(--ink-2); margin-top:2.5mm; line-height:1.32}
+  .keys{display:grid; grid-template-columns:1fr 1fr; gap:5.52mm; margin-top:5.52mm}
+  .key{background:var(--plane); border-radius:2.5mm; padding:5.52mm}
+  .key .v{font-size:12.88mm; font-weight:700; line-height:1}
+  .key .l{font-size:7.36mm; color:var(--ink-2); margin-top:2.12mm; line-height:1.32}
 
   footer{padding-top:7mm; border-top:.7mm solid var(--ink);
          display:grid; grid-template-columns:2fr 1fr; gap:16mm}
@@ -88,7 +85,7 @@
 <body>
 
 <header>
-  <h1>[TITLE — 你的海报标题，8–14 个词]</h1>
+  <h1>Large Language Models and grammatical Overcorrection</h1>
   <div class="byline">
     <div class="who">Qiancao Jiang</div>
     <div class="where">
@@ -102,20 +99,17 @@
   <div class="col">
     <section>
       <h2>Motivation</h2>
-      <div class="todo" style="min-height:66mm"><b>[你的文字：动机]</b>
-        <span class="hint">约 60–80 词。为什么 overcorrection 值得研究；BabyLM 最初的吸引力；引 Kopylova et al. (2026)。</span></div>
+      <p>LLMs tend to completely rewrite sentences written by non-native speakers to conform to the expression style of native speakers (Kopylova et al., 2026; Munda et al., 2024). In contrast, BabyLM (Warstadt et al., 2023) has lower cognitive complexity, and I hypothesize that it may align more naturally with the “minimal correction” teaching principle, thereby avoiding “overcorrection.”</p>
     </section>
 
     <section>
       <h2>Research question</h2>
-      <div class="todo" style="min-height:52mm"><b>[你的文字：研究问题]</b>
-        <span class="hint">一句话，直接从 2-page summary 搬过来。可加一句说明为什么从 BabyLM 转向了同族参数阶梯。</span></div>
+      <p>However, the experimental results involving BabyLMs indicate that the non-instruction-tuned models are unable to perform this grammatical error correction task. Consequently, my research question shifted to: <b>Does the number of parameters in locally deployable, open-source, and free large language models affect the phenomenon of overcorrection when the models correct grammatical errors?</b></p>
     </section>
 
     <section>
       <h2>Hypothesis</h2>
-      <div class="todo" style="min-height:42mm"><b>[你的文字：假设]</b>
-        <span class="hint">约 25 词。假设 + overcorrection 的操作化定义（normalized edit distance + FP 数）。</span></div>
+      <p>I treat overcorrection as the normalized edit distance plus the number of FP. My hypothesis is that large language models with fewer parameters are less prone to overcorrection.</p>
     </section>
 
     <section>
@@ -133,18 +127,18 @@
       </dl>
     </section>
 
-    <section>
-      <h2>Why two measures</h2>
-      <p class="small">Edit magnitude asks <b>how much</b> a condition changed the sentence; ERRANT asks <b>whether the changes were the right ones</b>. Magnitude alone cannot separate a model that edits little because it is restrained from one that edits little because it cannot correct — a model that simply copies the input scores a perfect 0.</p>
-    </section>
   </div>
 
   <div class="col">
     <section>
+      <h2>Why two measures</h2>
+      <p class="small">Edit magnitude asks <b>how much</b> a condition changed the sentence; ERRANT asks <b>whether the changes were the right ones</b>. Magnitude alone cannot separate a model that edits little because it is restrained from one that edits little because it cannot correct — a model that simply copies the input scores a perfect 0.</p>
+    </section>
+
+    <section>
       <h2>Finding 1 · a step, not a gradient</h2>
-      <div class="todo" style="min-height:42mm"><b>[你的文字：Finding 1 的结论]</b>
-        <span class="hint">约 30–40 词。可直接用 summary 里那句，加上"阈值在 1.5B–3B 之间"。</span></div>
-      <figure style="margin-top:6mm">
+      <p>As the number of parameters increases, the model becomes less prone to overcorrection; however, this decrease follows a “stepwise” rather than a “gradual” pattern. There is a threshold between 1.5B and 3B, rather than a continuous pattern where “the more parameters, the fewer corrections.”</p>
+      <figure style="margin-top:5.52mm">
         <div class="legend"><span><i style="background:var(--model)"></i>Model</span><span><i style="background:var(--human)"></i>Human annotator</span></div>
         <svg viewBox="0 0 600 300" role="img" aria-label="Median normalized edit magnitude with 95% bootstrap confidence intervals">
           <!-- gridlines -->
@@ -175,8 +169,8 @@
           </g>
           <!-- 0.5B -->
           <g stroke="#2a78d6" stroke-width="3" stroke-linecap="round">
-            <line x1="445.7" y1="50" x2="501.7" y2="50"/>
-            <line x1="445.7" y1="42" x2="445.7" y2="58"/><line x1="501.7" y1="42" x2="501.7" y2="58"/>
+            <line x1="447" y1="50" x2="501.7" y2="50"/>
+            <line x1="447" y1="42" x2="447" y2="58"/><line x1="501.7" y1="42" x2="501.7" y2="58"/>
           </g>
           <circle cx="493.5" cy="50" r="8" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
           <text x="493.5" y="28" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">0.244</text>
@@ -196,8 +190,8 @@
           <text x="388.2" y="125" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">0.167</text>
           <!-- human -->
           <g stroke="#eb6834" stroke-width="3" stroke-linecap="round">
-            <line x1="365" y1="200" x2="433.3" y2="200"/>
-            <line x1="365" y1="192" x2="365" y2="208"/><line x1="433.3" y1="192" x2="433.3" y2="208"/>
+            <line x1="355.4" y1="200" x2="433.3" y2="200"/>
+            <line x1="355.4" y1="192" x2="355.4" y2="208"/><line x1="433.3" y1="192" x2="433.3" y2="208"/>
           </g>
           <circle cx="388.2" cy="200" r="8" fill="#eb6834" stroke="#ffffff" stroke-width="2"/>
           <text x="388.2" y="185" font-size="18" font-weight="700" fill="#0b0b0b" text-anchor="middle" font-family="system-ui,sans-serif">0.167</text>
@@ -234,7 +228,7 @@
           <circle cx="337.4" cy="109" r="8" fill="#2a78d6" stroke="#ffffff" stroke-width="2"/>
           <text x="355" y="115" font-size="18" font-weight="700" fill="#0b0b0b" font-family="system-ui,sans-serif">1.74</text>
         </svg>
-        <figcaption>Friedman χ²(2) = 25.64, <i>p</i> &lt; .001. <b>0.5B and 1.5B are nearly tied; 3B sits clearly below both</b> — the shape of a step rather than a gradient.</figcaption>
+        <figcaption>Friedman χ²(2) = 25.64, <i>p</i> &lt; .001. <b>0.5B and 1.5B are nearly tied; 3B sits clearly below both</b> (<i>p</i> &lt; .001, <i>r</i> = .53 / .56) — the shape of a step rather than a gradient.</figcaption>
       </figure>
     </section>
 
@@ -248,7 +242,7 @@
         <tr><td class="who">1.5B</td><td class="sent">It's difficult <b>to</b> answer the question "What are you going to do in the future?" if <b>the person who knows must be</b> in two minds.</td><td class="mag">4 · .273</td></tr>
         <tr><td class="who">0.5B</td><td class="sent">It's <b>challenging</b> to answer the question "What are you going to do in the future? " <b>when</b> the only one who <b>knows</b> it is <b>unsure</b>.</td><td class="mag">5 · .303</td></tr>
       </table>
-      <p class="small" style="margin-top:4.5mm">Human makes exactly two minimal edits (insert <code>to</code>, delete <code>at</code>). <b>3B makes the same two</b> — its output is token-for-token the annotator's. 1.5B rewrites the subordinate clause. 0.5B also replaces <code>difficult</code>, <code>if</code> and <code>in two minds</code> — none of which contained a grammatical error.</p>
+      <p class="small" style="margin-top:4.14mm">Human makes exactly two minimal edits (insert <code>to</code>, delete <code>at</code>). <b>3B makes the same two</b> — its output is token-for-token the annotator's. 1.5B rewrites the subordinate clause. 0.5B also replaces <code>difficult</code>, <code>if</code> and <code>in two minds</code> — none of which contained a grammatical error.</p>
     </section>
 
   </div>
@@ -265,8 +259,7 @@
           <tr class="hi"><td>3B</td><td>181</td><td>724</td><td>372</td><td>.200</td><td>.327</td><td>.217</td><td>.289</td></tr>
         </tbody>
       </table>
-      <div class="todo" style="min-height:42mm; margin-top:5.5mm"><b>[你的文字：Finding 2 的解读]</b>
-        <span class="hint">约 30 词。3B 比 0.5B 多做对 60 处、少做无用 163 处；但 precision 仍只有 .20。</span></div>
+      <p style="margin-top:5.06mm">While fixing more actual errors, 3B made fewer unnecessary changes. Compared to 0.5B, 3B shows an increase in TP and a decrease in FP. This indicates that 60 more correct changes were made and 163 fewer unnecessary changes were made. Most of its changes are still unnecessary (precision 0.20).</p>
     </section>
 
     <section>
@@ -319,13 +312,12 @@
           <tr><td>3B</td><td>7</td><td>278</td><td>12</td></tr>
         </tbody>
       </table>
-      <p class="small" style="margin-top:4.5mm">TP and FN are <b>identical</b> across all three conditions and FP varies by 11%, while total FP varies by 24%. This category tracks output formatting, not correction behaviour. Excluding it widens 3B's false-positive advantage over 0.5B from <b>18%</b> to <b>30%</b>.</p>
+      <p class="small" style="margin-top:4.14mm">TP and FN are <b>identical</b> across all three conditions and FP varies by 11%, while total FP varies by 24%. This category tracks output formatting, not correction behaviour. Excluding it widens 3B's false-positive advantage over 0.5B from <b>18%</b> to <b>30%</b>.</p>
     </section>
 
     <section>
       <h2>Conclusion</h2>
-      <div class="todo" style="min-height:58mm"><b>[你的文字：结论]</b>
-        <span class="hint">约 40–50 词。假设被推翻（参数多的模型 overcorrection 更少）；台阶位置；对"本地部署 + 教学用途"意味着什么。</span></div>
+      <p>Based on the experimental results, I can reject my hypothesis; in fact, large language models with more parameters are less prone to overcorrection. When selecting large language models to assist with English instruction, educational institutions and individual teachers should, whenever possible, choose free large language models with a high number of parameters that can be deployed on local computers.</p>
       <div class="keys">
         <div class="key"><div class="v">3B ≈ human</div><div class="l">edit magnitude: no detectable difference (<i>r</i> = .09)</div></div>
         <div class="key"><div class="v">0.5B ≈ 1.5B</div><div class="l">no detectable difference either (<i>r</i> = .10)</div></div>
@@ -337,16 +329,17 @@
 <footer>
   <div class="refs">
     <h3>References</h3>
-    <p>Bryant, C., Felice, M., Andersen, Ø. E., &amp; Briscoe, T. (2019). The BEA-2019 shared task on grammatical error correction. <i>Proc. 14th Workshop on Innovative Use of NLP for Building Educational Applications</i>, 52–75.</p>
     <p>Bryant, C., Felice, M., &amp; Briscoe, T. (2017). Automatic annotation and evaluation of error types for grammatical error correction. <i>Proc. ACL</i>, 793–805.</p>
+    <p>Bryant, C., Felice, M., Andersen, Ø. E., &amp; Briscoe, T. (2019). The BEA-2019 shared task on grammatical error correction. <i>Proc. 14th Workshop on Innovative Use of NLP for Building Educational Applications</i>, 52–75.</p>
     <p>Charpentier, L. G. G., &amp; Samuel, D. (2024). GPT or BERT: Why not both? <i>The 2nd BabyLM Challenge (CoNLL)</i>, 262–283.</p>
     <p>Kopylova, E. V., Tsegoeva, O. G., Berlin, V. A., Vyrenkova, A. S., &amp; Kuvshinskaya, Y. M. (2026). Correcting or rewriting? An expert evaluation of LLM-based GEC on academic learner data. <i>Dialogue 2026</i>, <i>24</i>, 257–266.</p>
+    <p>Munda, R. K., Kumar, A., Singh, R., &amp; Burman, R. K. (2024). Analyzing grammar correction with GPT 3.5: A comparative study [Preprint]. <i>TechRxiv</i>.</p>
     <p>Qwen Team. (2025). <i>Qwen2.5 technical report</i> (arXiv:2412.15115).</p>
-    <p>Warstadt, A., et al. (2023). Findings of the BabyLM Challenge. <i>BabyLM Challenge (CoNLL)</i>, 1–34.</p>
+    <p>Warstadt, A., Mueller, A., Choshen, L., Wilcox, E., Zhuang, C., Ciro, J., Mosquera, R., Paranjabe, B., Williams, A., Linzen, T., &amp; Cotterell, R. (2023). Findings of the BabyLM Challenge: Sample-efficient pretraining on developmentally plausible corpora. <i>BabyLM Challenge (CoNLL)</i>, 1–34.</p>
   </div>
   <div class="repo">
     <h3>Code &amp; materials</h3>
-    <p class="url">[REPO URL]</p>
+    <p class="url">https://github.com/whks-wu/llm-seminar-project.git</p>
     <p class="tiny">Corpus text is not redistributed (W&amp;I+LOCNESS licence §6). The repository ships the sampling manifest (ids + seed + checksum), the manual annotation of model commentary, all analysis code, and the per-item measurement table.</p>
   </div>
 </footer>

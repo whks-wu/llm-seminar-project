@@ -1,7 +1,7 @@
 from pathlib import Path
 import difflib
 import pandas as pd
-import csv, re, difflib, statistics
+import re, difflib
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULT_PATH = ROOT / "results/pilot_outputs_qwensfamily_02_200.csv"
@@ -17,9 +17,9 @@ PUNCTUATION = ',.!?;:()"'
 PUNCT_RE = re.compile("([" + re.escape(PUNCTUATION) + "])")
 
 def load_data():
-    """Read the generation results and the manual annotations of model
-    commentary, join them, and check that the data is shaped the way the
-    analysis assumes.
+    """Read the generation results and manually selected comments
+    at the beginning or end, join them, and check that the data is
+    shaped the way the analysis assumes.
 
     Returns the 600-row long table with two extra columns: `preamble` and
     `suffix`.
@@ -27,15 +27,15 @@ def load_data():
     df = pd.read_csv(RESULT_PATH)
 
     assert set(df["model"]) == set(MODELS), sorted(set(df["model"]))
-
+    # Ensure that the file for storing comments is not empty.
     per_model = df.groupby("model").size()
     assert (per_model == N_ITEMS).all(), per_model.to_dict()
 
-    id_sets = {m: set(g["id"]) for m, g in df.groupby("model")}
+    id_sets = {m: set(g["id"]) for m, g in df.groupby("model")} # m is model, g is generation
     reference = id_sets[MODELS[0]]
-    assert len(reference) == N_ITEMS, len(reference)
+    assert len(reference) == N_ITEMS, len(reference) # checks that this set contains exactly N_ITEMS unique IDs—in this file, 200
     for m in MODELS[1:]:
-        assert id_sets[m] == reference, sorted(id_sets[m] ^ reference)
+        assert id_sets[m] == reference, sorted(id_sets[m] ^ reference) # finds IDs that are missing from one model or extra in the other
 
     # `source` and `gold_correction` are stored once per model, so each id has
     # three copies. They must agree: the human baseline is taken from one copy.
@@ -45,7 +45,7 @@ def load_data():
     # run_pilot.py writes a message here when a generation fails
     assert df["error"].isna().all(), df.loc[df["error"].notna(), ["id", "model", "error"]]
 
-    # the manual annotations
+    # read the csv of manually selected comments
     manual = pd.read_csv(MANUAL_PATH, dtype=str)
     assert list(manual.columns) == ["id", "model", "preamble", "suffix"], list(manual.columns)
     assert not manual.duplicated(["id", "model"]).any(), \
@@ -55,7 +55,7 @@ def load_data():
     assert (manual["preamble"].notna() | manual["suffix"].notna()).all(), \
         manual[manual["preamble"].isna() & manual["suffix"].isna()]
 
-    # join 
+    # join
     n_before = len(df)
     df = df.merge(manual, on=["id", "model"], how="left", validate="one_to_one")
     assert len(df) == n_before, (n_before, len(df))
@@ -65,8 +65,8 @@ def load_data():
     suf_counts = df[df["suffix"].notna()].groupby("model").size().to_dict()
     assert suf_counts == SUFFIX_COUNTS, suf_counts
 
-    # the recorded clauses must really sit at the recorded end of the output —
-    # this is what catches a mistyped id or a text the annotation no longer fits
+    # check whether the stripped output starts with the stripped preamble
+    # or suffix and collect each True or False result into ok
     flagged = df[df["preamble"].notna()]
     ok = [out.strip().startswith(pre.strip())
           for out, pre in zip(flagged["parsed_output"], flagged["preamble"])]
@@ -80,7 +80,7 @@ def load_data():
     return df
     
 def strip_commentary(text, pre, suf):
-    """Remove the preamble from a model output."""
+    """Remove the preamble from a model output. Return the clean text"""
     text = text.strip()
 
     if not pd.isna(pre):

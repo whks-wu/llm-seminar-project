@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from scipy import stats
-import sys, numpy, pandas, scipy
+import sys, scipy
 import itertools
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -92,8 +92,8 @@ def friedman(df, conditions):
     return results_dict
 
 def pairwise(df, conditions):
-    """ By comparing all pairs of models, 
-    we can determine whether their differences are significant. 
+    """ By comparing all pairs of models,
+    we can determine whether their differences are significant.
     return modelspair, n, p_raw, p_holm, r
     """
     rows = []

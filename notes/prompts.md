@@ -99,7 +99,7 @@ Correct only grammatical errors in this sentence and then only output the correc
 
 {sentence}
 ```
-*Why updated:* The outputs are not clear and don't keep simple. They have explanation. 
+*Why updated:* The outputs are not clear and don't keep simple. They have explanation.
 Examples:
 Half of them have a preface, half do not, and the format of the prefaces is inconsistent.
 

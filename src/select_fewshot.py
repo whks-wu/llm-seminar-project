@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
 sample few-shot demonstration examples from the TRAINING split.
+
+(I stopped using this program after I decided to adopt the family-based command-line model;
+I kept it in the folder solely as evidence that it was used during the experiment.)
 """
 
 import json

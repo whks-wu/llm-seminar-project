@@ -45,14 +45,6 @@ MODELS = {
     },
 }
 
-# Dropped after the 20-sentence pilot (results/pilot_outputs.csv), kept here for the record:
-#   "gpt-bert-babylm-small" -> ltg/gpt-bert-babylm-small  (10M words, ~30M params)
-#   "gpt2"                  -> openai-community/gpt2      (~9B tokens, 124M params)
-# Neither can perform generative error correction: GPT-2 reproduced the input verbatim on
-# 18/20 few-shot items, GPT-BERT emitted fragments and continued into new example blocks
-# on 19/20. Both also lack an eos token, so they cannot stop. The pilot output is retained
-# as Table 1 evidence rather than re-run at n=200.
-
 SAMPLE_PATH = Path(__file__).resolve().parent.parent / "data/processed/sample.jsonl"
 
 if torch.backends.mps.is_available():
