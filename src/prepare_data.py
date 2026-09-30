@@ -58,7 +58,7 @@ def parse_m2(path):
                 fields = line[2:].split("|||")
                 offsets = fields[0].split()
                 edit_type = fields[1]
-                if edit_type == "noop":
+                if edit_type == "noop": # the sentence is error-free
                     continue
                 edits.append({
                     "start": int(offsets[0]),
@@ -75,16 +75,13 @@ def parse_m2(path):
 
 
 def apply_edits(source, edits):
-    """Reconstruct the corrected sentence by applying edits to the source tokens.
-
-    Offsets refer to positions in the ORIGINAL token list, so edits are applied
-    right-to-left; that way earlier offsets are still valid when we reach them.
-    Ties are applied in reverse listing order so that two insertions at the same
-    position keep their original relative order in the output.
-    """
+    """Reconstruct the corrected sentence by applying edits to the source tokens."""
     tokens = source.split()
     ordered = sorted(edits, key=lambda e: (e["start"], e["end"]))
-    for edit in reversed(ordered):
+    # Iterate through the list in reverse order, starting from the end.
+    # So, when replacing, adding, or deleting words at the beginning,
+    # it won't affect the index positions of the unprocessed words that follow.
+    for edit in reversed(ordered): 
         start, end = edit["start"], edit["end"]
         if start < 0:
             continue
@@ -92,12 +89,16 @@ def apply_edits(source, edits):
             raise ValueError(
                 f"edit span [{start}:{end}] out of bounds for {len(tokens)} tokens"
             )
+        # Replace the words in the incorrect section with the correct sequence of words
         tokens[start:end] = edit["correction"].split()
     return " ".join(tokens)
 
 # Filtering
 def keep_sentence(source, edits):
-    """Apply the D5 inclusion criteria. Returns bool, reason_if_rejected."""
+    """Evaluate whether the current sentence and its corresponding revision meet
+    the requirements, in order to determine whether to include the sentence in
+    the final sample set."""
+
     if not edits:
         return False, "noop"
 
@@ -129,6 +130,7 @@ def main():
             rejected[reason] = rejected.get(reason, 0) + 1
             continue
 
+        # Building Gold Data
         gold = apply_edits(source, edits)
 
         # Some ERRANT UNK annotations record a "correction" identical to the source
@@ -151,10 +153,11 @@ def main():
             "n_tokens": len(source.split()),
         })
 
+    # Sampling and Data Preservation
     if len(kept) < SAMPLE_SIZE:
         raise SystemExit(f"Only {len(kept)} eligible sentences; need {SAMPLE_SIZE}.")
 
-    rng = random.Random(RANDOM_SEED)
+    rng = random.Random(RANDOM_SEED) # Initialize a random object with a random seed
     sample = rng.sample(kept, SAMPLE_SIZE)
     sample.sort(key=lambda item: item["id"])
 
@@ -162,9 +165,12 @@ def main():
     with open(OUT_PATH, "w", encoding="utf-8") as fh:
         for item in sample:
             fh.write(json.dumps(item, ensure_ascii=False) + "\n")
-
+    
+    # Generate a metadata list and print the log
     digest = hashlib.sha256(OUT_PATH.read_bytes()).hexdigest()
     with open(MANIFEST_PATH, "w", encoding="utf-8") as fh:
+        # Format the output using indentation and write it to the MANIFEST_PATH file
+        # Used for version control and issue tracking
         json.dump({
             "description": "Reproducibility manifest. The corpus text itself is not "
                            "redistributed (W&I licence clause 6 permits excerpts under "
@@ -188,7 +194,7 @@ def main():
     print(f"manifest                 : {MANIFEST_PATH}")
     print(f"sample.jsonl sha256      : {digest[:16]}...")
 
-    # summary 
+    # summary
     print(f"eligible after filtering : {len(kept)}")
     print(f"rejected                 : {rejected}")
     print(f"written                  : {len(sample)} -> {OUT_PATH}")

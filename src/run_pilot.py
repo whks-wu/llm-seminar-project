@@ -115,7 +115,7 @@ def pilot(sentences):
 
         # release models
         del m, tok
-        gc.collect()  # a memory management technique, automatically reclaim memory
+        gc.collect()  # memory management, automatically reclaim memory
         torch.mps.empty_cache()
 
     elapsed = time.time() - run_start

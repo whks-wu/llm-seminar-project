@@ -6,6 +6,15 @@ Prints, for a random handful of items in data/processed/sample.jsonl:
   (A) what the M2 annotation SAYS should change, and
   (B) what ACTUALLY differs between `source` and `gold_correction`, computed
       independently with difflib.
+
+What to look for:
+  1. Does `gold` read as plausible English? Garbled word order, duplicated or truncated
+     words mean apply_edits() has an offset bug.
+  2. Does (B) match (A)? Same words, same direction. If the annotation says delete "at"
+     but the diff shows a different word vanished, the offsets are off by one.
+  3. Is the correction MINIMAL — only the flagged error touched, nothing else rewritten?
+  4. Count mismatches are not automatically wrong: two adjacent edits can merge into one
+     diff region. Read those cases rather than trusting the number.
 """
 
 import difflib
@@ -18,7 +27,7 @@ from pathlib import Path
 SAMPLE_PATH = Path(__file__).resolve().parent.parent / "data/processed/sample.jsonl"
 
 def actual_changes(source, gold):
-    """Word-level diff between the two strings, independent of the annotation."""
+    """Compare and Record Changes"""
     a, b = source.split(), gold.split()
     out = []
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b).get_opcodes():
@@ -36,10 +45,11 @@ def actual_changes(source, gold):
 def main():
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 5
     seed = int(sys.argv[2]) if len(sys.argv) > 2 else None
+    # read data and do sample
+    rows = [json.loads(line) for line in open(SAMPLE_PATH, encoding="utf-8")] # Parse each line into a dict and collect them into a list
+    picked = random.Random(seed).sample(rows, min(n, len(rows))) # Return k distinct elements without replacement
 
-    rows = [json.loads(line) for line in open(SAMPLE_PATH, encoding="utf-8")]
-    picked = random.Random(seed).sample(rows, min(n, len(rows)))
-
+    # Print each entry
     for item in picked:
         print("=" * 78)
         print(f"[{item['id']}]   {item['n_gold_edits']} annotated edit(s), "
@@ -47,7 +57,7 @@ def main():
         print(f"  source : {item['source']}")
         print(f"  gold   : {item['gold_correction']}")
 
-        print("  (A) annotation says:")
+        print("  (A) annotation says:")   # what the M2 annotation SAYS should change
         for e in item["gold_edits"]:
             corr = e["correction"]
             if e["start"] == e["end"]:
@@ -58,26 +68,21 @@ def main():
                 what = f'replace tokens [{e["start"]}:{e["end"]}] with "{corr}"'
             print(f'        {e["type"]:<16} {what}')
 
-        print("  (B) source -> gold actually differs by:")
+        print("  (B) source -> gold actually differs by:") # what ACTUALLY differs between `source` and `gold_correction`
         changes = actual_changes(item["source"], item["gold_correction"])
-        for c in changes or ["(nothing — this is a bug)"]:
+        for c in changes or ["(nothing — this is a bug)"]: # When `changes` is empty, the entire expression takes ["(nothing — this is a bug)"].
             print(f"        {c}")
 
+        # Is the count correct?
+        # Here's a hint as to why two numbers can legitimately be unequal.
+        # For example, the annotations say “Remove ‘the’” and “Replace ‘transport’ with ‘transportation’” are two separate edits,
+        # but since they appear next to each other in the sentence, the diff only reports one change:
+        # “replace ‘the transport’ -> ‘transportation’.” 1 ≠ 2
+        # Attention: M2 annotation is done one word at a time, but SequenceMatcher merges adjacent changes into a single opcode.
         flag = "" if len(changes) == item["n_gold_edits"] else \
                "   <-- counts differ, inspect (may be legitimate: adjacent edits merge)"
         print(f"  edits annotated: {item['n_gold_edits']}   "
               f"diffs found: {len(changes)}{flag}")
-    print("=" * 78)
-    print("""
-What to look for:
-  1. Does `gold` read as plausible English? Garbled word order, duplicated or truncated
-     words mean apply_edits() has an offset bug.
-  2. Does (B) match (A)? Same words, same direction. If the annotation says delete "at"
-     but the diff shows a different word vanished, the offsets are off by one.
-  3. Is the correction MINIMAL — only the flagged error touched, nothing else rewritten?
-  4. Count mismatches are not automatically wrong: two adjacent edits can merge into one
-     diff region. Read those cases rather than trusting the number.
-""")
 
 if __name__ == "__main__":
     main()
