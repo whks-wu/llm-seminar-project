@@ -69,28 +69,12 @@ and could flatten the very difference the study is trying to measure. Sampling t
 approximate the corpus edit-count distribution makes that bias explicit, documented and
 reproducible instead of arbitrary.
 
-Note: `sample.jsonl` averages 2.83 edits, but it spans 5–40 tokens; longer sentences carry
+Note: 
+
+`sample.jsonl` averages 2.83 edits, but it spans 5–40 tokens; longer sentences carry
 more errors, so 2.83 is not the right reference for 8–18 token examples.
 
----
-
-## Open decisions
-
-- [ ] No instruction line precedes the few-shot examples. Keep it that way, or add one?
-      (An ambiguous instruction after 8 demonstrations may be noise rather than help.)
-- [ ] Whether the example set needs a different seed after reading all 8 by hand.
-- [ ] GPT-BERT's `max_position_embeddings` is still unchecked. If it is 512, a ~330-token
-      prompt leaves ~150 tokens for generation; if 256, the prompt overflows and the
-      example count must be cut.
-
-## Limitations to carry into the report
-
-- All three models receive the identical prompt, so prompt effects are constant across
-  conditions — but the few-shot examples still impose a shared edit-size prior on all of them.
-- Two of the eight examples begin with a punctuation edit (`M:PUNCT`), so the prompt does
-  demonstrate that punctuation is in scope. Consistent with D5 (punctuation edits retained),
-  but worth stating.
-
+After deciding not to use non-instruction-based large models, I abandoned the few-shot prompt. 
 
 ## updated Variant 1 — zero-shot-02
 
